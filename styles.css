@@ -24,15 +24,15 @@ body {
 #redBox1 {
     width: 30px;
     height: 50px;
-    top: 20%;
-    left: 20%;
+    top: 50%;
+    left: 45%;
 }
 
 #redBox2 {
     width: 30px;
     height: 50px;
-    top: 20%;
-    left: 30%;
+    top: 50%;
+    left: 42.5%;
 }
 
 .boxLabel {
