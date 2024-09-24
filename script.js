@@ -81,7 +81,7 @@ analyzeBtn.addEventListener('click', function() {
 
     // 分別顯示三個紅框的 RGB 結果
     result.innerHTML = `
-        S RGB: (${color1.r.toFixed(3)}, ${color1.g.toFixed(3)}, ${color1.b.toFixed(3)})<br>
+        標準品 RGB: (${color1.r.toFixed(3)}, ${color1.g.toFixed(3)}, ${color1.b.toFixed(3)})<br>
         樣品 RGB: (${color2.r.toFixed(3)}, ${color2.g.toFixed(3)}, ${color2.b.toFixed(3)})<br>
 		農藥濃度: ${o3D.toFixed(3)} ppm
     `;
