@@ -77,7 +77,7 @@ analyzeBtn.addEventListener('click', function() {
     const color2 = getAverageColor(redBox2);
 	
 // 計算濃度
-    const o3D = color2.r/color1.r
+    const o3D = color2.b/color1.b
 
     // 分別顯示三個紅框的 RGB 結果
     result.innerHTML = `
