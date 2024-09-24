@@ -83,6 +83,6 @@ analyzeBtn.addEventListener('click', function() {
     result.innerHTML = `
         Standard RGB: (${color1.r.toFixed(3)}, ${color1.g.toFixed(3)}, ${color1.b.toFixed(3)})<br>
         Sample RGB: (${color2.r.toFixed(3)}, ${color2.g.toFixed(3)}, ${color2.b.toFixed(3)})<br>
-		臭氧濃度: ${o3D.toFixed(3)} ppm
+		農藥濃度: ${o3D.toFixed(3)} ppm
     `;
 });
