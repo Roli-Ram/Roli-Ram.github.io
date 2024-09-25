@@ -28,13 +28,6 @@ body {
     left: 40%;
 }
 
-#redBox2 {
-    width: 30px;
-    height: 50px;
-    top: 50%;
-    left: 50%;
-}
-
 .boxLabel {
     position: absolute;
     top: -25px; /* 將標籤放置在红框上方 */
