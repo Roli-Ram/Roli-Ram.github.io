@@ -4,7 +4,6 @@ const result = document.getElementById('result');
 
 // 紅框元素
 const redBox1 = document.getElementById('redBox1');
-const redBox2 = document.getElementById('redBox2');
 
 // 啟動攝像頭
 async function startCamera() {
@@ -77,25 +76,17 @@ analyzeBtn.addEventListener('click', function() {
     const interval = setInterval(() => {
         // 分別取得每個紅框的平均 RGB
         const color1 = getAverageColor(redBox1);
-        const color2 = getAverageColor(redBox2);
-        
-        // 計算濃度
-        const o3D = ((color2.b - color1.b) / color1.b) * 100;
 
         // 記錄每次取得的 RGB 值
         logRGBValues.push({
             time: intervalCount * 10, // 當前時間 (秒)
             color1: { r: color1.r.toFixed(3), g: color1.g.toFixed(3), b: color1.b.toFixed(3) },
-            color2: { r: color2.r.toFixed(3), g: color2.g.toFixed(3), b: color2.b.toFixed(3) },
-            inhibitionRate: o3D.toFixed(2) // 酵素抑制率
         });
 
         // 更新結果顯示
         result.innerHTML = `
             時間: ${intervalCount * 10} 秒<br>
-            標準品 RGB: (${color1.r.toFixed(3)}, ${color1.g.toFixed(3)}, ${color1.b.toFixed(3)})<br>
-            樣品 RGB: (${color2.r.toFixed(3)}, ${color2.g.toFixed(3)}, ${color2.b.toFixed(3)})<br>
-            酵素抑制率: ${o3D.toFixed(2)} %<br>
+            樣品 RGB: (${color1.r.toFixed(3)}, ${color1.g.toFixed(3)}, ${color1.b.toFixed(3)})<br>
         `;
 
         intervalCount++;
