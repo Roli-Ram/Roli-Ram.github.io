@@ -86,7 +86,7 @@ function downloadExcel(logRGBValues) {
 // 每 10 秒取一次值，持續 3 分鐘
 analyzeBtn.addEventListener('click', function() {
     const logRGBValues = [];
-    let intervalCount = 1;
+    let intervalCount = 0;
     const interval = setInterval(() => {
         // 分別取得紅框的平均 RGB
         const color1 = getAverageColor(redBox1);
@@ -106,7 +106,7 @@ analyzeBtn.addEventListener('click', function() {
         intervalCount++;
 
         // 當 3 分鐘（180 秒）結束時停止
-        if (intervalCount >= 18) {
+        if (intervalCount >= 361) {
             clearInterval(interval);
 
             // 顯示全部記錄的結果
