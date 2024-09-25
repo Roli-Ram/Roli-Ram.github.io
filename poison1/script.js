@@ -72,7 +72,7 @@ function getAverageColor(box) {
 // 每 10 秒取一次值，持續 3 分鐘
 analyzeBtn.addEventListener('click', function() {
     const logRGBValues = [];
-    let intervalCount = 0;
+    let intervalCount = 1;
     const interval = setInterval(() => {
         // 分別取得每個紅框的平均 RGB
         const color1 = getAverageColor(redBox1);
