@@ -69,12 +69,26 @@ function getAverageColor(box) {
     return { r: r / count, g: g / count, b: b / count };
 }
 
+// 生成 Excel 文件並下載
+function downloadExcel(logRGBValues) {
+    const wb = XLSX.utils.book_new();
+    const wsData = [["Time (s)", "Sample R", "Sample G", "Sample B"]];
+
+    logRGBValues.forEach(entry => {
+        wsData.push([entry.time, entry.color1.r, entry.color1.g, entry.color1.b]);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    XLSX.utils.book_append_sheet(wb, ws, "RGB Data");
+    XLSX.writeFile(wb, "rgb_results.xlsx");
+}
+
 // 每 10 秒取一次值，持續 3 分鐘
 analyzeBtn.addEventListener('click', function() {
     const logRGBValues = [];
-    let intervalCount = 0;
+    let intervalCount = 1;
     const interval = setInterval(() => {
-        // 分別取得每個紅框的平均 RGB
+        // 分別取得紅框的平均 RGB
         const color1 = getAverageColor(redBox1);
 
         // 記錄每次取得的 RGB 值
@@ -91,8 +105,8 @@ analyzeBtn.addEventListener('click', function() {
 
         intervalCount++;
 
-        // 當 7 分鐘（420 秒）結束時停止
-        if (intervalCount >= 61) {
+        // 當 3 分鐘（180 秒）結束時停止
+        if (intervalCount >= 18) {
             clearInterval(interval);
 
             // 顯示全部記錄的結果
@@ -101,11 +115,13 @@ analyzeBtn.addEventListener('click', function() {
                 樣品 RGB: (${entry.color1.r}, ${entry.color1.g}, ${entry.color1.b})<br>
             `).join('<br><br>');
 
-            // 把全部的結果顯示在頁面上
             result.innerHTML = `
                 <h3>取樣結果 (每10秒):</h3><br>
                 ${allResults}
             `;
+
+            // 下載 Excel 檔案
+            downloadExcel(logRGBValues);
         }
     }, 10000); // 每 10 秒取一次值
 });
