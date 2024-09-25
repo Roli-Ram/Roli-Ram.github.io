@@ -83,7 +83,7 @@ analyzeBtn.addEventListener('click', function() {
             color1: { r: color1.r.toFixed(3), g: color1.g.toFixed(3), b: color1.b.toFixed(3) },
         });
 
-        // 更新結果顯示
+        // 即時更新目前的取樣結果
         result.innerHTML = `
             時間: ${intervalCount * 10} 秒<br>
             樣品 RGB: (${color1.r.toFixed(3)}, ${color1.g.toFixed(3)}, ${color1.b.toFixed(3)})<br>
@@ -94,7 +94,18 @@ analyzeBtn.addEventListener('click', function() {
         // 當 3 分鐘（180 秒）結束時停止
         if (intervalCount >= 18) {
             clearInterval(interval);
-            console.log('RGB Values Log:', logRGBValues); // 在 console 中列出所有記錄的 RGB 值
+
+            // 顯示全部記錄的結果
+            let allResults = logRGBValues.map(entry => `
+                時間: ${entry.time} 秒<br>
+                樣品 RGB: (${entry.color1.r}, ${entry.color1.g}, ${entry.color1.b})<br>
+            `).join('<br><br>');
+
+            // 把全部的結果顯示在頁面上
+            result.innerHTML = `
+                <h3>取樣結果 (每10秒):</h3><br>
+                ${allResults}
+            `;
         }
     }, 10000); // 每 10 秒取一次值
 });
