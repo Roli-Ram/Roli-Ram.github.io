@@ -92,7 +92,7 @@ analyzeBtn.addEventListener('click', function() {
         intervalCount++;
 
         // 當 7 分鐘（420 秒）結束時停止
-        if (intervalCount >= 60) {
+        if (intervalCount >= 61) {
             clearInterval(interval);
 
             // 顯示全部記錄的結果
