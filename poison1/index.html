@@ -5,22 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>攝像頭顏色分析</title>
     <link rel="stylesheet" href="styles.css">
-     <!-- 引入 xlsx 庫 -->
+    <!-- 引入 xlsx 庫 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 </head>
 <body>
     <h1>農藥顏色分析定量</h1>
     <div class="container">
-    <video id="camera" autoplay></video>
+        <video id="camera" autoplay></video>
 
-    <!-- 紅框1 -->
-    <div id="redBox1" class="redBox">
-	<span class="boxLabel">樣品</span> 
-	</div>
+        <!-- 紅框1 -->
+        <div id="redBox1" class="redBox">
+            <span class="boxLabel">樣品</span> 
+        </div>
 
-    <button id="analyzeBtn">分析</button>
-    <p id="result">RGB: (R, G, B)</p>
-</div>
+        <button id="analyzeBtn">分析</button>
+        <button id="stopBtn">提前結束</button>
+        <p id="result">RGB: (R, G, B)</p>
+    </div>
 
     <script src="script.js"></script>
 </body>

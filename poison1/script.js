@@ -1,9 +1,13 @@
 const video = document.getElementById('camera');
 const analyzeBtn = document.getElementById('analyzeBtn');
+const stopBtn = document.getElementById('stopBtn');
 const result = document.getElementById('result');
 
 // 紅框元素
 const redBox1 = document.getElementById('redBox1');
+
+let interval;  // 定義 interval 變量
+let logRGBValues = [];  // 用來存儲取樣結果
 
 // 啟動攝像頭
 async function startCamera() {
@@ -18,6 +22,7 @@ async function startCamera() {
             video.play();
         };
         analyzeBtn.disabled = false;
+        stopBtn.disabled = true;  // 初始化禁用「提前結束」按鈕
     } catch (err) {
         console.error("無法啟動攝像頭: ", err);
         result.innerHTML = `錯誤：無法啟動攝像頭。${err.message}`;
@@ -33,39 +38,31 @@ function getAverageColor(box) {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     
-    // 設定 canvas 大小為攝像頭畫面的解析度
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-    // 將攝像頭畫面繪製到 canvas
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // 取得視頻框的邊界和紅框的邊界
     const videoRect = video.getBoundingClientRect();
     const boxRect = box.getBoundingClientRect();
 
-    // 計算視頻的縮放比例（因為視頻的解析度和顯示大小可能不同）
     const scaleX = video.videoWidth / videoRect.width;
     const scaleY = video.videoHeight / videoRect.height;
 
-    // 計算紅框在視頻上的座標與大小
     const boxX = (boxRect.left - videoRect.left) * scaleX;
     const boxY = (boxRect.top - videoRect.top) * scaleY;
     const boxWidth = boxRect.width * scaleX;
     const boxHeight = boxRect.height * scaleY;
 
-    // 取得紅框內的像素數據
     const imageData = ctx.getImageData(boxX, boxY, boxWidth, boxHeight).data;
 
-    // 計算紅框內的 RGB 平均值
     let r = 0, g = 0, b = 0, count = 0;
     for (let i = 0; i < imageData.length; i += 4) {
-        r += imageData[i];     // Red
-        g += imageData[i + 1]; // Green
-        b += imageData[i + 2]; // Blue
+        r += imageData[i];    
+        g += imageData[i + 1];
+        b += imageData[i + 2];
         count++;
     }
 
-    // 回傳紅框內的平均 RGB 顏色
     return { r: r / count, g: g / count, b: b / count };
 }
 
@@ -83,21 +80,22 @@ function downloadExcel(logRGBValues) {
     XLSX.writeFile(wb, "rgb_results.xlsx");
 }
 
-// 每 10 秒取一次值，持續 3 分鐘
+// 分析按鈕點擊事件
 analyzeBtn.addEventListener('click', function() {
-    const logRGBValues = [];
-    let intervalCount = 0;
-    const interval = setInterval(() => {
-        // 分別取得紅框的平均 RGB
+    logRGBValues = [];  // 清空舊的取樣結果
+    let intervalCount = 1;
+
+    stopBtn.disabled = false;  // 启用「提前結束」按鈕
+    analyzeBtn.disabled = true; // 禁用分析按鈕
+
+    interval = setInterval(() => {
         const color1 = getAverageColor(redBox1);
 
-        // 記錄每次取得的 RGB 值
         logRGBValues.push({
-            time: intervalCount * 10, // 當前時間 (秒)
+            time: intervalCount * 10, 
             color1: { r: color1.r.toFixed(3), g: color1.g.toFixed(3), b: color1.b.toFixed(3) },
         });
 
-        // 即時更新目前的取樣結果
         result.innerHTML = `
             時間: ${intervalCount * 10} 秒<br>
             樣品 RGB: (${color1.r.toFixed(3)}, ${color1.g.toFixed(3)}, ${color1.b.toFixed(3)})<br>
@@ -105,23 +103,21 @@ analyzeBtn.addEventListener('click', function() {
 
         intervalCount++;
 
-        // 當 3 分鐘（180 秒）結束時停止
-        if (intervalCount >= 361) {
+        if (intervalCount >= 18) {
             clearInterval(interval);
-
-            // 顯示全部記錄的結果
-            let allResults = logRGBValues.map(entry => `
-                時間: ${entry.time} 秒<br>
-                樣品 RGB: (${entry.color1.r}, ${entry.color1.g}, ${entry.color1.b})<br>
-            `).join('<br><br>');
-
-            result.innerHTML = `
-                <h3>取樣結果 (每10秒):</h3><br>
-                ${allResults}
-            `;
-
-            // 下載 Excel 檔案
+            result.innerHTML += `<h3>取樣結果 (每10秒):</h3>`;
             downloadExcel(logRGBValues);
+            analyzeBtn.disabled = false;  // 分析結束，重新啟用按鈕
+            stopBtn.disabled = true; // 停用提前結束按鈕
         }
     }, 10000); // 每 10 秒取一次值
+});
+
+// 提前結束按鈕點擊事件
+stopBtn.addEventListener('click', function() {
+    clearInterval(interval);  // 停止定時器
+    result.innerHTML += `<h3>取樣已提前結束</h3>`;
+    downloadExcel(logRGBValues);  // 下載當前的結果
+    analyzeBtn.disabled = false;  // 重新啟用分析按鈕
+    stopBtn.disabled = true;  // 禁用提前結束按鈕
 });
