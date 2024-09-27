@@ -101,7 +101,7 @@ function downloadExcel(logRGBValues) {
 // 分析按鈕點擊事件
 analyzeBtn.addEventListener('click', async function() {
     logRGBValues = [];  // 清空舊的取樣結果
-    let intervalCount = 1;
+    let intervalCount = 0;
 
     // 禁用按鈕和啟用提前結束按鈕
     stopBtn.disabled = false;  
@@ -128,7 +128,7 @@ analyzeBtn.addEventListener('click', async function() {
 
         intervalCount++;
 
-        if (intervalCount >= 18) {
+        if (intervalCount >= 361) {
             clearInterval(interval);
             result.innerHTML += `<h3>取樣結果 (每10秒):</h3>`;
             downloadExcel(logRGBValues);
