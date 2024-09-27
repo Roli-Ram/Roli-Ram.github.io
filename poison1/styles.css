@@ -4,12 +4,6 @@ body {
     margin-top: 50px;
 }
 
-.version-display {
-    font-size: 14px;
-    color: gray;
-    margin-bottom: 20px;  /* 在標題和版本號之間留些間距 */
-}
-
 .container {
     position: relative;
     display: inline-block;
@@ -33,9 +27,9 @@ body {
 #redBox1 {
     width: 30px;  /* 使用視口寬度的5%作為紅框的大小，適應不同設備 */
     height: 30px;  /* 高度與寬度相同，保持正方形 */
-    top: 80%;
+    top: 55%;  /* 使用相對於容器的百分比，將紅框稍微向下移動 */
     left: 50%;
-    transform: translate(-40%, -50%);  /* 使紅框居中 */
+    transform: translate(-50%, -50%);  /* 使紅框居中 */
     position: absolute;
 }
 
