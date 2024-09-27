@@ -25,19 +25,19 @@ body {
 }
 
 #redBox1 {
-    width: 30px;  /* 使用視口寬度的8%作為紅框的大小，適應不同設備 */
+    width: 30px;  /* 使用視口寬度的10%作為紅框的大小 */
     height: 30px;  /* 高度與寬度相同，保持正方形 */
-    top: 50%;  /* 將紅框設置在攝像頭畫面中央 */
+    top: 50%;  /* 設置在攝像頭容器的中央 */
     left: 50%;
-    transform: translate(-50%, -50%);  /* 使紅框保持在中心 */
+    transform: translate(-50%, -50%);  /* 保持紅框垂直和水平居中 */
     position: absolute;
 }
 
 /* 為手機設備進行特殊處理，調整紅框位置 */
 @media screen and (max-width: 768px) {
     #redBox1 {
-        top: 52%;  /* 減少偏下位置，讓紅框更靠近中心 */
-        transform: translate(-50%, -50%);  /* 保持居中顯示 */
+        top: 50%;  /* 保持在容器中間 */
+        transform: translate(-50%, -45%);  /* 只在垂直方向上微調，稍微偏下 */
     }
 }
 
