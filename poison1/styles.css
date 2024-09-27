@@ -33,7 +33,7 @@ body {
 #redBox1 {
     width: 30px;  /* 使用視口寬度的5%作為紅框的大小，適應不同設備 */
     height: 30px;  /* 高度與寬度相同，保持正方形 */
-    top: 50%;
+    top: 70%;
     left: 50%;
     transform: translate(-50%, -50%);  /* 使紅框居中 */
     position: absolute;
