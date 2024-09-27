@@ -8,8 +8,8 @@ body {
     position: relative;
     display: inline-block;
     width: 100%;
-    max-width: 400px;  /* 設置容器最大寬度，讓攝像頭畫面不會太大 */
-    height: auto; /* 設置容器最大高度 */
+    max-width: 400px;  /* 設置容器最大寬度 */
+    height: auto;  /* 讓容器自動調整高度 */
 }
 
 #camera {
@@ -25,17 +25,18 @@ body {
 }
 
 #redBox1 {
-    width: 30px;  /* 使用視口寬度的5%作為紅框的大小，適應不同設備 */
+    width: 30px;  /* 使用視口寬度的10%作為紅框的大小 */
     height: 30px;  /* 高度與寬度相同，保持正方形 */
-    top: 45%;  /* 使用相對於容器的百分比，將紅框稍微向下移動 */
+    top: 45%;  /* 將紅框移到攝像頭畫面的中間偏下位置 */
     left: 50%;
-    transform: translate(-50%, -50%);  /* 使紅框居中 */
+    transform: translate(-50%, -50%);  /* 使紅框保持居中 */
     position: absolute;
 }
 
+/* 為手機設備進行特殊處理，調整紅框位置 */
 @media screen and (max-width: 768px) {
     #redBox1 {
-        top: 80%;  /* 將紅框在手機屏幕上移動得更靠下 */
+        top: 65%;  /* 在手機上將紅框移動到更偏下位置 */
     }
 }
 
@@ -52,7 +53,7 @@ body {
     text-align: center;
     font-size: 12px;
     color: yellow;
-    background-color: rgba(100, 50, 100, 0.7); /* 半透明白色背景 */
+    background-color: rgba(100, 50, 100, 0.7); /* 半透明背景 */
     padding: 2px;
     border-radius: 3px;
 }
