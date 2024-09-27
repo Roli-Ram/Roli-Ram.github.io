@@ -35,68 +35,22 @@ async function toggleTorch(on) {
     try {
         const track = stream.getVideoTracks()[0]; // 獲取後置攝像頭的視頻 track
         const capabilities = track.getCapabilities();
-        
+
         if (capabilities.torch) { // 檢查設備是否支持手電筒
             await track.applyConstraints({
                 advanced: [{ torch: on }] // 開啟或關閉手電筒
             });
         } else {
-            console.log("設備不支持手電筒功能");
+            alert("此設備不支持手電筒功能。");  // 提示設備不支持手電筒
         }
     } catch (err) {
         console.error("無法控制手電筒: ", err);
+        alert("無法控制手電筒，可能是設備不支持或權限問題。");
     }
 }
 
-// 初始化
+// 初始化攝像頭
 startCamera();
-
-// 計算指定框中的顏色平均值
-function getAverageColor(box) {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    const videoRect = video.getBoundingClientRect();
-    const boxRect = box.getBoundingClientRect();
-
-    const scaleX = video.videoWidth / videoRect.width;
-    const scaleY = video.videoHeight / videoRect.height;
-
-    const boxX = (boxRect.left - videoRect.left) * scaleX;
-    const boxY = (boxRect.top - videoRect.top) * scaleY;
-    const boxWidth = boxRect.width * scaleX;
-    const boxHeight = boxRect.height * scaleY;
-
-    const imageData = ctx.getImageData(boxX, boxY, boxWidth, boxHeight).data;
-
-    let r = 0, g = 0, b = 0, count = 0;
-    for (let i = 0; i < imageData.length; i += 4) {
-        r += imageData[i];    
-        g += imageData[i + 1];
-        b += imageData[i + 2];
-        count++;
-    }
-
-    return { r: r / count, g: g / count, b: b / count };
-}
-
-// 生成 Excel 文件並下載
-function downloadExcel(logRGBValues) {
-    const wb = XLSX.utils.book_new();
-    const wsData = [["Time (s)", "Sample R", "Sample G", "Sample B"]];
-
-    logRGBValues.forEach(entry => {
-        wsData.push([entry.time, entry.color1.r, entry.color1.g, entry.color1.b]);
-    });
-
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-    XLSX.utils.book_append_sheet(wb, ws, "RGB Data");
-    XLSX.writeFile(wb, "rgb_results.xlsx");
-}
 
 // 分析按鈕點擊事件
 analyzeBtn.addEventListener('click', async function() {
