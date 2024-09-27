@@ -2,20 +2,19 @@ const video = document.getElementById('camera');
 const analyzeBtn = document.getElementById('analyzeBtn');
 const stopBtn = document.getElementById('stopBtn');
 const result = document.getElementById('result');
+const redBox1 = document.getElementById('redBox1');  // 紅框元素
 
-// 紅框元素
-const redBox1 = document.getElementById('redBox1');
-
+let stream;  // 保存攝像頭流
 let interval;  // 定義 interval 變量
 let logRGBValues = [];  // 用來存儲取樣結果
 
-// 啟動攝像頭
+// 啟動攝像頭並嘗試啟用手電筒
 async function startCamera() {
     try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
+        stream = await navigator.mediaDevices.getUserMedia({ 
             video: { 
                 facingMode: 'environment' // 優先使用後置攝像頭
-            } 
+            }
         });
         video.srcObject = stream;
         video.onloadedmetadata = () => {
@@ -30,8 +29,23 @@ async function startCamera() {
     }
 }
 
-// 初始化
-startCamera();
+// 開啟手電筒
+async function toggleTorch(on) {
+    try {
+        const track = stream.getVideoTracks()[0]; // 獲取後置攝像頭的視頻 track
+        const capabilities = track.getCapabilities();
+        
+        if (capabilities.torch) { // 檢查設備是否支持手電筒
+            await track.applyConstraints({
+                advanced: [{ torch: on }] // 開啟或關閉手電筒
+            });
+        } else {
+            console.log("設備不支持手電筒功能");
+        }
+    } catch (err) {
+        console.error("無法控制手電筒: ", err);
+    }
+}
 
 // 計算指定框中的顏色平均值
 function getAverageColor(box) {
@@ -81,12 +95,19 @@ function downloadExcel(logRGBValues) {
 }
 
 // 分析按鈕點擊事件
-analyzeBtn.addEventListener('click', function() {
+analyzeBtn.addEventListener('click', async function() {
     logRGBValues = [];  // 清空舊的取樣結果
-    let intervalCount = 0;
+    let intervalCount = 1;
 
-    stopBtn.disabled = false;  // 启用「提前結束」按鈕
-    analyzeBtn.disabled = true; // 禁用分析按鈕
+    // 禁用按鈕和啟用提前結束按鈕
+    stopBtn.disabled = false;  
+    analyzeBtn.disabled = true; 
+
+    // 固定紅框位置
+    redBox1.classList.add('fixed');
+
+    // 開啟手電筒
+    await toggleTorch(true);
 
     interval = setInterval(() => {
         const color1 = getAverageColor(redBox1);
@@ -103,12 +124,13 @@ analyzeBtn.addEventListener('click', function() {
 
         intervalCount++;
 
-        if (intervalCount >= 181) {
+        if (intervalCount >= 18) {
             clearInterval(interval);
             result.innerHTML += `<h3>取樣結果 (每10秒):</h3>`;
             downloadExcel(logRGBValues);
             analyzeBtn.disabled = false;  // 分析結束，重新啟用按鈕
             stopBtn.disabled = true; // 停用提前結束按鈕
+            toggleTorch(false); // 分析結束後關閉手電筒
         }
     }, 10000); // 每 10 秒取一次值
 });
@@ -120,4 +142,5 @@ stopBtn.addEventListener('click', function() {
     downloadExcel(logRGBValues);  // 下載當前的結果
     analyzeBtn.disabled = false;  // 重新啟用分析按鈕
     stopBtn.disabled = true;  // 禁用提前結束按鈕
+    toggleTorch(false); // 提前結束後關閉手電筒
 });
