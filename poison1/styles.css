@@ -35,7 +35,7 @@ body {
 
 @media screen and (max-width: 768px) {
     #redBox1 {
-        top: 60%;  /* 將紅框在手機屏幕上移動得更靠下 */
+        top: 80%;  /* 將紅框在手機屏幕上移動得更靠下 */
     }
 }
 
