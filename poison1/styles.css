@@ -7,11 +7,14 @@ body {
 .container {
     position: relative;
     display: inline-block;
+    width: 100%;
+    max-width: 400px;  /* 設置容器最大寬度，讓攝像頭畫面不會太大 */
+    max-height: 300px; /* 設置容器最大高度 */
 }
 
 #camera {
-    width: 100%;
-    max-width: 400px;
+    width: 100%;  /* 攝像頭寬度充滿容器 */
+    height: auto; /* 高度根據寬度自適應 */
     border: 1px solid #ccc;
 }
 
@@ -22,8 +25,8 @@ body {
 }
 
 #redBox1 {
-    width: 30px;
-    height: 30px;
+    width: 1.5vw;  /* 使用視口寬度的5%作為紅框的大小，適應不同設備 */
+    height: 1.5vw;  /* 高度與寬度相同，保持正方形 */
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);  /* 使紅框居中 */
@@ -37,7 +40,7 @@ body {
 
 .boxLabel {
     position: absolute;
-    top: -25px; /* 將標籤放置在红框上方 */
+    top: -25px; /* 將標籤放置在紅框上方 */
     left: 0;
     width: 100%;
     text-align: center;

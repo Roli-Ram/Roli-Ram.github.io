@@ -22,6 +22,7 @@ async function startCamera() {
         };
         analyzeBtn.disabled = false;
         stopBtn.disabled = true;  // 初始化禁用「提前結束」按鈕
+        console.log("攝像頭已成功啟動");
     } catch (err) {
         console.error("無法啟動攝像頭: ", err);
         result.innerHTML = `錯誤：無法啟動攝像頭。${err.message}`;
@@ -46,6 +47,9 @@ async function toggleTorch(on) {
         console.error("無法控制手電筒: ", err);
     }
 }
+
+// 初始化
+startCamera();
 
 // 計算指定框中的顏色平均值
 function getAverageColor(box) {
