@@ -4,6 +4,12 @@ body {
     margin-top: 50px;
 }
 
+.version-display {
+    font-size: 14px;
+    color: gray;
+    margin-bottom: 20px;  /* 在標題和版本號之間留些間距 */
+}
+
 .container {
     position: relative;
     display: inline-block;
