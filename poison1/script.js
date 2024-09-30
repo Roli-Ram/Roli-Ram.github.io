@@ -11,10 +11,8 @@ let logRGBValues = [];  // 用來存儲取樣結果
 // 啟動攝像頭並嘗試啟用手電筒
 async function startCamera() {
     try {
-        stream = await navigator.mediaDevices.getUserMedia({ 
-            video: { 
-                facingMode: 'environment' // 優先使用後置攝像頭
-            }
+        stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'environment' } // 優先使用後置攝像頭
         });
         video.srcObject = stream;
         video.onloadedmetadata = () => {
@@ -41,37 +39,84 @@ async function toggleTorch(on) {
                 advanced: [{ torch: on }] // 開啟或關閉手電筒
             });
         } else {
-            alert("此設備不支持手電筒功能。");  // 提示設備不支持手電筒
+            console.warn("此設備不支持手電筒功能。");  // 設備不支持手電筒時僅警告，繼續檢測
         }
     } catch (err) {
         console.error("無法控制手電筒: ", err);
-        alert("無法控制手電筒，可能是設備不支持或權限問題。");
+        alert("無法控制手電筒，繼續進行檢測。");  // 提示無法控制手電筒，繼續檢測
     }
 }
 
 // 初始化攝像頭
 startCamera();
 
+// 計算指定框中的顏色平均值
+function getAverageColor(box) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    const videoRect = video.getBoundingClientRect();
+    const boxRect = box.getBoundingClientRect();
+
+    const scaleX = video.videoWidth / videoRect.width;
+    const scaleY = video.videoHeight / videoRect.height;
+
+    const boxX = (boxRect.left - videoRect.left) * scaleX;
+    const boxY = (boxRect.top - videoRect.top) * scaleY;
+    const boxWidth = boxRect.width * scaleX;
+    const boxHeight = boxRect.height * scaleY;
+
+    const imageData = ctx.getImageData(boxX, boxY, boxWidth, boxHeight).data;
+
+    let r = 0, g = 0, b = 0, count = 0;
+    for (let i = 0; i < imageData.length; i += 4) {
+        r += imageData[i];    
+        g += imageData[i + 1];
+        b += imageData[i + 2];
+        count++;
+    }
+
+    return { r: r / count, g: g / count, b: b / count };
+}
+
+// 生成 Excel 文件並下載
+function downloadExcel(logRGBValues) {
+    const wb = XLSX.utils.book_new();
+    const wsData = [["Time (s)", "Sample R", "Sample G", "Sample B"]];
+
+    logRGBValues.forEach(entry => {
+        wsData.push([entry.time, entry.color1.r, entry.color1.g, entry.color1.b]);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    XLSX.utils.book_append_sheet(wb, ws, "RGB Data");
+    XLSX.writeFile(wb, "rgb_results.xlsx");
+}
+
 // 分析按鈕點擊事件
-analyzeBtn.addEventListener('click', async function() {
+analyzeBtn.addEventListener('click', async function () {
     logRGBValues = [];  // 清空舊的取樣結果
     let intervalCount = 0;
 
     // 禁用按鈕和啟用提前結束按鈕
-    stopBtn.disabled = false;  
-    analyzeBtn.disabled = true; 
+    stopBtn.disabled = false;
+    analyzeBtn.disabled = true;
 
     // 固定紅框位置
     redBox1.classList.add('fixed');
 
-    // 開啟手電筒
+    // 嘗試開啟手電筒，手電筒打不開也繼續檢測
     await toggleTorch(true);
 
     interval = setInterval(() => {
         const color1 = getAverageColor(redBox1);
 
         logRGBValues.push({
-            time: intervalCount * 10, 
+            time: intervalCount * 10,
             color1: { r: color1.r.toFixed(3), g: color1.g.toFixed(3), b: color1.b.toFixed(3) },
         });
 
@@ -94,7 +139,7 @@ analyzeBtn.addEventListener('click', async function() {
 });
 
 // 提前結束按鈕點擊事件
-stopBtn.addEventListener('click', function() {
+stopBtn.addEventListener('click', function () {
     clearInterval(interval);  // 停止定時器
     result.innerHTML += `<h3>取樣已提前結束</h3>`;
     downloadExcel(logRGBValues);  // 下載當前的結果
