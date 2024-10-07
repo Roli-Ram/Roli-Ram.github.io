@@ -8,13 +8,13 @@ body {
     position: relative;
     display: inline-block;
     width: 100%;
-    max-width: 400px;  /* 設置容器最大寬度 */
-    height: auto;  /* 讓容器自動調整高度 */
+    max-width: 400px;
+    height: auto;
 }
 
 #camera {
-    width: 100%;  /* 攝像頭寬度充滿容器 */
-    height: auto; /* 高度根據寬度自適應 */
+    width: 100%;
+    height: auto;
     border: 1px solid #ccc;
 }
 
@@ -24,35 +24,37 @@ body {
     pointer-events: none;
 }
 
-#redBox1, #redBox2 {  /* 將兩個紅框設置為相同大小 */
-    width: 30px;  /* 固定大小 */
+#redBox1, #redBox2 {
+    width: 30px;
     height: 30px;
     position: absolute;
 }
 
 #redBox1 {
-    top: 40%;
-    left: 50%;  /* 第一個紅框偏左 */
+    top: 30%;
+    left: 50%;
     transform: translate(-50%, -50%);
 }
 
 #redBox2 {
-    top: 60%;
-    left: 50%;  /* 第二個紅框偏右 */
+    top: 40%;
+    left: 50%;
     transform: translate(-50%, -50%);
 }
 
+/* 更新的標籤樣式，將標籤放在紅框左側並靠近紅框 */
 .boxLabel {
     position: absolute;
-    top: -25px;
-    left: 0;
-    width: 100%;
-    text-align: center;
+    top: 100%;  /* 垂直居中 */
+    left: -15px;  /* 將標籤移到更靠近紅框的左側 */
+    transform: translateY(-50%) rotate(-90deg);  /* 垂直顯示標籤 */
+    transform-origin: left center;  /* 設置旋轉中心為左側 */
     font-size: 12px;
     color: yellow;
     background-color: rgba(100, 50, 100, 0.7);
-    padding: 2px;
+    padding: 2px 5px;
     border-radius: 3px;
+    text-align: center;
 }
 
 #analyzeBtn {
