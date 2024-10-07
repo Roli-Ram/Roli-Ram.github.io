@@ -21,40 +21,36 @@ body {
 .redBox {
     position: absolute;
     border: 2px solid red;
-    pointer-events: none; /* 禁用紅框的點擊事件，使其不影響攝像頭預覽 */
+    pointer-events: none;
+}
+
+#redBox1, #redBox2 {  /* 將兩個紅框設置為相同大小 */
+    width: 30px;  /* 固定大小 */
+    height: 30px;
+    position: absolute;
 }
 
 #redBox1 {
-    width: 150px;  /* 使用視口寬度的10%作為紅框的大小 */
-    height: 150px;  /* 高度與寬度相同，保持正方形 */
-    top: 50%;  /* 設置在攝像頭容器的中央 */
-    left: 50%;
-    transform: translate(-50%, -50%);  /* 保持紅框垂直和水平居中 */
-    position: absolute;
+    top: 40%;
+    left: 50%;  /* 第一個紅框偏左 */
+    transform: translate(-50%, -50%);
 }
 
-/* 為手機設備進行特殊處理，調整紅框位置 */
-@media screen and (max-width: 768px) {
-    #redBox1 {
-        top: 50%;  /* 保持在容器中間 */
-        transform: translate(-50%, -45%);  /* 只在垂直方向上微調，稍微偏下 */
-    }
-}
-
-.redBox.fixed {
-    position: absolute;
-    pointer-events: none;
+#redBox2 {
+    top: 60%;
+    left: 50%;  /* 第二個紅框偏右 */
+    transform: translate(-50%, -50%);
 }
 
 .boxLabel {
     position: absolute;
-    top: -25px; /* 將標籤放置在紅框上方 */
+    top: -25px;
     left: 0;
     width: 100%;
     text-align: center;
     font-size: 12px;
     color: yellow;
-    background-color: rgba(100, 50, 100, 0.7); /* 半透明背景 */
+    background-color: rgba(100, 50, 100, 0.7);
     padding: 2px;
     border-radius: 3px;
 }
