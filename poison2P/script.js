@@ -81,10 +81,10 @@ function getAverageColor(box) {
 
 // 計算藍色抑制率
 function calculateInhibitionRate(controlColor, treatmentColor) {
-    const controlBlue = controlColor.b;  // 使用對照組的藍色通道值
-    const treatmentBlue = treatmentColor.b;  // 使用處理組的藍色通道值
+    const controlBlue = 255 - controlColor.b;  // 使用對照組的藍色通道值
+    const treatmentBlue = 255 - treatmentColor.b;  // 使用處理組的藍色通道值
 
-    const inhibitionRate = ((treatmentBlue - controlBlue) / controlBlue) * 100;
+    const inhibitionRate = ((controlBlue - treatmentBlue) / controlBlue) * 100;
     return inhibitionRate.toFixed(2);  // 保留兩位小數
 }
 
