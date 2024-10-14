@@ -115,7 +115,7 @@ analyzeBtn.addEventListener('click', async function () {
     
     result.innerHTML = `
         樣品1 RGB (處理組): (${color1.r.toFixed(3)}, ${color1.g.toFixed(3)}, ${color1.b.toFixed(3)})<br>
-        樣品2 RGB (對照組): (${color2.r.toFixed(3)}, ${color2.g.toFixed(3)}, ${color2.b.toFixed(3)})<br>
+        樣品2 RGB (0%): (${color2.r.toFixed(3)}, ${color2.g.toFixed(3)}, ${color2.b.toFixed(3)})<br>
         樣品3 RGB (100%): (${color3.r.toFixed(3)}, ${color3.g.toFixed(3)}, ${color3.b.toFixed(3)})<br>
         抑制率: ${inhibitionRate}%<br>
     `;
