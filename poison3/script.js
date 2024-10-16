@@ -17,22 +17,6 @@ async function startCamera() {
         const track = stream.getVideoTracks()[0];  // 獲取視頻流的track
         const capabilities = track.getCapabilities();  // 檢查設備能力
 
-        // 檢查是否支持手動對焦，禁用自動對焦
-        if (capabilities.focusMode && capabilities.focusMode.includes('manual')) {
-            await track.applyConstraints({ advanced: [{ focusMode: 'manual' }] });
-            console.log("已手動禁用自動對焦");
-        } else {
-            console.warn("此設備不支持手動對焦");
-        }
-
-        // 檢查是否支持手動曝光，禁用自動曝光
-        if (capabilities.exposureMode && capabilities.exposureMode.includes('manual')) {
-            await track.applyConstraints({ advanced: [{ exposureMode: 'manual' }] });
-            console.log("已手動禁用自動曝光");
-        } else {
-            console.warn("此設備不支持手動曝光");
-        }
-
         // 檢查是否支持手動白平衡，禁用自動白平衡
         if (capabilities.whiteBalanceMode && capabilities.whiteBalanceMode.includes('manual')) {
             await track.applyConstraints({ advanced: [{ whiteBalanceMode: 'manual' }] });
