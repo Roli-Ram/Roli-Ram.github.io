@@ -9,9 +9,47 @@ let stream;
 
 async function startCamera() {
     try {
+        // 獲取相機的視頻流
         stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: 'environment' }
+            video: {
+                facingMode: 'environment',  // 使用後置攝像頭
+                advanced: [
+                    { focusMode: 'manual' },         // 禁用自動對焦
+                    { exposureMode: 'manual' },      // 禁用自動曝光
+                    { whiteBalanceMode: 'manual' }   // 禁用自動白平衡
+                ]
+            }
         });
+        const track = stream.getVideoTracks()[0];  // 獲取視頻流的track
+        const capabilities = track.getCapabilities();  // 檢查設備能力
+
+        // 檢查是否支持手動控制這些功能
+        if (capabilities.focusMode) {
+            // 設置手動對焦
+            await track.applyConstraints({
+                advanced: [{ focusMode: 'manual' }]
+            });
+            console.log("已手動禁用自動對焦");
+        }
+
+        if (capabilities.exposureMode) {
+            // 設置手動曝光
+            await track.applyConstraints({
+                advanced: [{ exposureMode: 'manual' }]
+            });
+            console.log("已手動禁用自動曝光");
+        }
+
+        if (capabilities.whiteBalanceMode) {
+            // 設置手動白平衡
+            await track.applyConstraints({
+                advanced: [{ whiteBalanceMode: 'manual' }]
+            });
+            console.log("已手動禁用自動白平衡");
+        } else {
+            console.warn("此設備不支持手動禁用白平衡");
+        }
+
         video.srcObject = stream;
         video.onloadedmetadata = () => {
             video.play();
@@ -23,6 +61,7 @@ async function startCamera() {
         analyzeBtn.disabled = true;
     }
 }
+
 
 async function toggleTorch(on) {
     try {
