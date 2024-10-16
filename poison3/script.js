@@ -9,17 +9,25 @@ let stream;
 
 async function startCamera() {
     try {
-        // 僅啟用最基礎的相機流，不應用任何手動控制
         stream = await navigator.mediaDevices.getUserMedia({
             video: { facingMode: 'environment' }  // 使用後置攝像頭
         });
+
+        const track = stream.getVideoTracks()[0];
+        const capabilities = track.getCapabilities();
+
+        // 逐步應用功能，比如先嘗試禁用自動白平衡
+        if (capabilities.whiteBalanceMode && capabilities.whiteBalanceMode.includes('manual')) {
+            await track.applyConstraints({ advanced: [{ whiteBalanceMode: 'manual' }] });
+            console.log("已手動禁用自動白平衡");
+        }
 
         video.srcObject = stream;
         video.onloadedmetadata = () => {
             video.play();
         };
         analyzeBtn.disabled = false;
-        console.log("相機啟動成功，未應用手動控制。");
+        console.log("相機啟動成功，應用手動控制。");
 
     } catch (err) {
         console.error("無法啟動攝像頭: ", err);
@@ -27,6 +35,7 @@ async function startCamera() {
         analyzeBtn.disabled = true;
     }
 }
+
 
 async function toggleTorch(on) {
     try {
