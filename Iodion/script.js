@@ -109,7 +109,7 @@ analyzeBtn.addEventListener('click', async function () {
         const color3 = getAverageColor(redBox3);
 
         logRGBValues.push({
-            time: intervalCount * 10,
+            time: intervalCount * 300,
             color1: { r: color1.r.toFixed(3), g: color1.g.toFixed(3), b: color1.b.toFixed(3) },
             color2: { r: color2.r.toFixed(3), g: color2.g.toFixed(3), b: color2.b.toFixed(3) },
             color3: { r: color3.r.toFixed(3), g: color3.g.toFixed(3), b: color3.b.toFixed(3) }
@@ -117,21 +117,43 @@ analyzeBtn.addEventListener('click', async function () {
 
         result.innerHTML = `
             時間: ${intervalCount * 10} 秒<br>
-            樣品1 RGB: (${color1.r.toFixed(3)}, ${color1.g.toFixed(3)}, ${color1.b.toFixed(3)})<br>
-            樣品2 RGB: (${color2.r.toFixed(3)}, ${color2.g.toFixed(3)}, ${color2.b.toFixed(3)})<br>
-            樣品3 RGB: (${color3.r.toFixed(3)}, ${color3.g.toFixed(3)}, ${color3.b.toFixed(3)})<br>
+            空白 RGB: (${color1.r.toFixed(3)}, ${color1.g.toFixed(3)}, ${color1.b.toFixed(3)})<br>
+            10 uL RGB: (${color2.r.toFixed(3)}, ${color2.g.toFixed(3)}, ${color2.b.toFixed(3)})<br>
+            20 uL RGB: (${color3.r.toFixed(3)}, ${color3.g.toFixed(3)}, ${color3.b.toFixed(3)})<br>
         `;
 
         intervalCount++;
-        if (intervalCount >= 361) {
+        // **開始每5分鐘取樣一次**
+        interval = setInterval(() => {
+            const color1 = getAverageColor(redBox1);
+            const color2 = getAverageColor(redBox2);
+            const color3 = getAverageColor(redBox3);
+            logRGBValues.push({
+            time: intervalCount * 300, // 每次取樣的時間 (秒)
+            color1: { r: color1.r.toFixed(3), g: color1.g.toFixed(3), b: color1.b.toFixed(3) },
+            color2: { r: color2.r.toFixed(3), g: color2.g.toFixed(3), b: color2.b.toFixed(3) },
+            color3: { r: color3.r.toFixed(3), g: color3.g.toFixed(3), b: color3.b.toFixed(3) }
+        });
+
+        result.innerHTML = `
+            時間: ${intervalCount * 10} 秒<br>
+            空白 RGB: (${color1.r.toFixed(3)}, ${color1.g.toFixed(3)}, ${color1.b.toFixed(3)})<br>
+            10 uL RGB: (${color2.r.toFixed(3)}, ${color2.g.toFixed(3)}, ${color2.b.toFixed(3)})<br>
+            20 uL RGB: (${color3.r.toFixed(3)}, ${color3.g.toFixed(3)}, ${color3.b.toFixed(3)})<br>
+        `;
+
+        intervalCount++; // 增加時間計數器
+
+        // 如果到達測試時間限制，停止
+        if (intervalCount >= 12) { // 12 次表示 1 小時
             clearInterval(interval);
-            result.innerHTML += `<h3>取樣結果 (每10秒):</h3>`;
+            result.innerHTML += `<h3>取樣結果已完成</h3>`;
             downloadExcel(logRGBValues);
             analyzeBtn.disabled = false;
             stopBtn.disabled = true;
-            toggleTorch(false);
+            toggleTorch(false); // 關閉手電筒
         }
-    }, 10000);
+    }, 300000); // 每 5 分鐘取樣一次
 });
 
 stopBtn.addEventListener('click', function () {
