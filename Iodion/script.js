@@ -12,10 +12,6 @@ let logRGBValues = [];
 
 async function startCamera() {
     try {
-        if (location.protocol !== 'https:') {
-            throw new Error("非 HTTPS 環境，無法啟動攝像頭");
-        }
-
         stream = await navigator.mediaDevices.getUserMedia({
             video: { facingMode: 'environment' }
         });
@@ -23,24 +19,12 @@ async function startCamera() {
         video.onloadedmetadata = () => video.play();
         analyzeBtn.disabled = false;
         stopBtn.disabled = true;
-        console.log("攝像頭已成功啟動");
     } catch (err) {
         console.error("無法啟動攝像頭: ", err);
-        let errorMsg = "錯誤：無法啟動攝像頭。";
-        if (err.name === "NotAllowedError") {
-            errorMsg = "錯誤：未授權訪問攝像頭。請允許訪問攝像頭。";
-        } else if (err.name === "NotFoundError") {
-            errorMsg = "錯誤：未檢測到攝像頭設備。";
-        } else if (err.name === "NotReadableError") {
-            errorMsg = "錯誤：攝像頭被其他應用佔用。";
-        } else if (err.message === "非 HTTPS 環境，無法啟動攝像頭") {
-            errorMsg = "警告：為保護隱私，請在 HTTPS 協議下運行此應用。";
-        }
-        result.innerHTML = errorMsg;
+        result.innerHTML = `錯誤：無法啟動攝像頭。${err.message}`;
         analyzeBtn.disabled = true;
     }
 }
-
 
 async function toggleTorch(on) {
     try {
@@ -125,7 +109,7 @@ analyzeBtn.addEventListener('click', async function () {
         const color3 = getAverageColor(redBox3);
 
         logRGBValues.push({
-            time: intervalCount * 300,
+            time: intervalCount * 10,
             color1: { r: color1.r.toFixed(3), g: color1.g.toFixed(3), b: color1.b.toFixed(3) },
             color2: { r: color2.r.toFixed(3), g: color2.g.toFixed(3), b: color2.b.toFixed(3) },
             color3: { r: color3.r.toFixed(3), g: color3.g.toFixed(3), b: color3.b.toFixed(3) }
@@ -133,43 +117,21 @@ analyzeBtn.addEventListener('click', async function () {
 
         result.innerHTML = `
             時間: ${intervalCount * 10} 秒<br>
-            空白 RGB: (${color1.r.toFixed(3)}, ${color1.g.toFixed(3)}, ${color1.b.toFixed(3)})<br>
-            10 uL RGB: (${color2.r.toFixed(3)}, ${color2.g.toFixed(3)}, ${color2.b.toFixed(3)})<br>
-            20 uL RGB: (${color3.r.toFixed(3)}, ${color3.g.toFixed(3)}, ${color3.b.toFixed(3)})<br>
+            樣品1 RGB: (${color1.r.toFixed(3)}, ${color1.g.toFixed(3)}, ${color1.b.toFixed(3)})<br>
+            樣品2 RGB: (${color2.r.toFixed(3)}, ${color2.g.toFixed(3)}, ${color2.b.toFixed(3)})<br>
+            樣品3 RGB: (${color3.r.toFixed(3)}, ${color3.g.toFixed(3)}, ${color3.b.toFixed(3)})<br>
         `;
 
         intervalCount++;
-        // **開始每5分鐘取樣一次**
-        interval = setInterval(() => {
-            const color1 = getAverageColor(redBox1);
-            const color2 = getAverageColor(redBox2);
-            const color3 = getAverageColor(redBox3);
-            logRGBValues.push({
-            time: intervalCount * 300, // 每次取樣的時間 (秒)
-            color1: { r: color1.r.toFixed(3), g: color1.g.toFixed(3), b: color1.b.toFixed(3) },
-            color2: { r: color2.r.toFixed(3), g: color2.g.toFixed(3), b: color2.b.toFixed(3) },
-            color3: { r: color3.r.toFixed(3), g: color3.g.toFixed(3), b: color3.b.toFixed(3) }
-        });
-
-        result.innerHTML = `
-            時間: ${intervalCount * 10} 秒<br>
-            空白 RGB: (${color1.r.toFixed(3)}, ${color1.g.toFixed(3)}, ${color1.b.toFixed(3)})<br>
-            10 uL RGB: (${color2.r.toFixed(3)}, ${color2.g.toFixed(3)}, ${color2.b.toFixed(3)})<br>
-            20 uL RGB: (${color3.r.toFixed(3)}, ${color3.g.toFixed(3)}, ${color3.b.toFixed(3)})<br>
-        `;
-
-        intervalCount++; // 增加時間計數器
-
-        // 如果到達測試時間限制，停止
-        if (intervalCount >= 12) { // 12 次表示 1 小時
+        if (intervalCount >= 361) {
             clearInterval(interval);
-            result.innerHTML += `<h3>取樣結果已完成</h3>`;
+            result.innerHTML += `<h3>取樣結果 (每10秒):</h3>`;
             downloadExcel(logRGBValues);
             analyzeBtn.disabled = false;
             stopBtn.disabled = true;
-            toggleTorch(false); // 關閉手電筒
+            toggleTorch(false);
         }
-    }, 300000); // 每 5 分鐘取樣一次
+    }, 10000);
 });
 
 stopBtn.addEventListener('click', function () {

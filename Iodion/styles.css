@@ -64,7 +64,7 @@ body {
 
 .boxLabel {
     position: absolute;
-    top: -35px; /* 將標籤放置在紅框上方 */
+    top: -25px; /* 將標籤放置在紅框上方 */
     left: 0;
     width: 100%;
     text-align: center;
