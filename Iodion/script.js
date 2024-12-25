@@ -12,6 +12,10 @@ let logRGBValues = [];
 
 async function startCamera() {
     try {
+        if (location.protocol !== 'https:') {
+            throw new Error("非 HTTPS 環境，無法啟動攝像頭");
+        }
+
         stream = await navigator.mediaDevices.getUserMedia({
             video: { facingMode: 'environment' }
         });
@@ -19,12 +23,24 @@ async function startCamera() {
         video.onloadedmetadata = () => video.play();
         analyzeBtn.disabled = false;
         stopBtn.disabled = true;
+        console.log("攝像頭已成功啟動");
     } catch (err) {
         console.error("無法啟動攝像頭: ", err);
-        result.innerHTML = `錯誤：無法啟動攝像頭。${err.message}`;
+        let errorMsg = "錯誤：無法啟動攝像頭。";
+        if (err.name === "NotAllowedError") {
+            errorMsg = "錯誤：未授權訪問攝像頭。請允許訪問攝像頭。";
+        } else if (err.name === "NotFoundError") {
+            errorMsg = "錯誤：未檢測到攝像頭設備。";
+        } else if (err.name === "NotReadableError") {
+            errorMsg = "錯誤：攝像頭被其他應用佔用。";
+        } else if (err.message === "非 HTTPS 環境，無法啟動攝像頭") {
+            errorMsg = "警告：為保護隱私，請在 HTTPS 協議下運行此應用。";
+        }
+        result.innerHTML = errorMsg;
         analyzeBtn.disabled = true;
     }
 }
+
 
 async function toggleTorch(on) {
     try {
