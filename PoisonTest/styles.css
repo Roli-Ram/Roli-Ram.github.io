@@ -1,0 +1,91 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin-top: 50px;
+}
+
+.container {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    max-width: 400px;  /* 設置容器最大寬度 */
+    height: auto;  /* 讓容器自動調整高度 */
+}
+
+#camera {
+    width: 100%;  /* 攝像頭寬度充滿容器 */
+    height: auto; /* 高度根據寬度自適應 */
+    border: 1px solid #ccc;
+}
+
+.redBox {
+    position: absolute;
+    border: 2px solid red;
+    pointer-events: none;
+    z-index: 10;
+    width: 25px;  /* 固定大小，便於位置計算 */
+    height: 25px;
+    background-color: rgba(255, 0, 0, 0.2); /* 測試用透明背景 */
+}
+
+.container {
+    position: relative; /* 確保子元素的絕對定位以此為參考 */
+}
+
+#redBox1, #redBox2 {
+    width: 25px;
+    height: 25px;
+    position: absolute;
+}
+
+#redBox1 {
+    top: 30%;  /* 設置在攝像頭容器的中央 */
+    left: 50%;
+    transform: translate(-50%, -50%);  /* 保持紅框垂直和水平居中 */
+    position: absolute;
+}
+
+#redBox2 {
+    top: 42.5%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* 為手機設備進行特殊處理，調整紅框位置 */
+@media screen and (max-width: 768px) {
+    #redBox1 {
+        top: 50%;  /* 保持在容器中間 */
+        transform: translate(-50%, -45%);  /* 只在垂直方向上微調，稍微偏下 */
+    }
+}
+
+.redBox.fixed {
+    position: absolute;
+    pointer-events: none;
+}
+
+.boxLabel {
+    position: absolute;
+    top: 125%;  /* 垂直居中 */
+    left: -15px;  /* 將標籤移到更靠近紅框的左側 */
+    transform: translateY(-50%) rotate(-90deg);  /* 垂直顯示標籤 */
+    transform-origin: left center;  /* 設置旋轉中心為左側 */
+    font-size: 10px;
+    color: yellow;
+    background-color: rgba(100, 50, 100, 0.7);
+    padding: 2px 5px;
+    border-radius: 3px;
+    text-align: center;
+}
+
+#analyzeBtn {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+#result {
+    margin-top: 20px;
+    font-size: 16px;
+}
