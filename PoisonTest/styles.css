@@ -39,14 +39,14 @@ body {
 }
 
 #redBox1 {
-    top: 30%;  /* 設置在攝像頭容器的中央 */
+    top: 50%;  /* 設置在攝像頭容器的中央 */
     left: 50%;
     transform: translate(-50%, -50%);  /* 保持紅框垂直和水平居中 */
     position: absolute;
 }
 
 #redBox2 {
-    top: 50%;
+    top: 30%;
     left: 50%;
     transform: translate(-50%, -50%);
 }
