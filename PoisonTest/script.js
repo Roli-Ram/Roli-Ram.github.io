@@ -44,30 +44,46 @@ async function startCamera() {
 function makeDraggable(box) {
     let offsetX = 0, offsetY = 0, isDragging = false;
 
-    box.addEventListener('mousedown', (e) => {
+    function startDragging(e) {
         isDragging = true;
-        offsetX = e.clientX - box.getBoundingClientRect().left;
-        offsetY = e.clientY - box.getBoundingClientRect().top;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        offsetX = clientX - box.getBoundingClientRect().left;
+        offsetY = clientY - box.getBoundingClientRect().top;
         document.body.style.cursor = 'grabbing';
-    });
+    }
 
-    document.addEventListener('mousemove', (e) => {
+    function moveDragging(e) {
         if (!isDragging) return;
+
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
         const containerRect = document.querySelector('.container').getBoundingClientRect();
-        const left = e.clientX - containerRect.left - offsetX;
-        const top = e.clientY - containerRect.top - offsetY;
+        const left = clientX - containerRect.left - offsetX;
+        const top = clientY - containerRect.top - offsetY;
 
         box.style.left = `${left}px`;
         box.style.top = `${top}px`;
 
         // 更新位置
         redBoxPositions[box.id] = { left, top };
-    });
+    }
 
-    document.addEventListener('mouseup', () => {
+    function stopDragging() {
         isDragging = false;
         document.body.style.cursor = 'default';
-    });
+    }
+
+    // 框的拖動事件監聽
+    box.addEventListener('mousedown', startDragging);
+    box.addEventListener('touchstart', startDragging);
+
+    document.addEventListener('mousemove', moveDragging);
+    document.addEventListener('touchmove', moveDragging, { passive: false });
+
+    document.addEventListener('mouseup', stopDragging);
+    document.addEventListener('touchend', stopDragging);
 }
 
 function getAverageColor(box) {
