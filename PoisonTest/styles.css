@@ -21,11 +21,11 @@ body {
 .redBox {
     position: absolute;
     border: 2px solid red;
-    pointer-events: none;
-    z-index: 10;
-    width: 100px;  /* 固定大小，便於位置計算 */
+    width: 100px;
     height: 50px;
-    background-color: rgba(255, 0, 0, 0.2); /* 測試用透明背景 */
+    cursor: move; /* 提示可以拖動 */
+    z-index: 10;
+    background-color: rgba(255, 0, 0, 0.2);
 }
 
 .container {
