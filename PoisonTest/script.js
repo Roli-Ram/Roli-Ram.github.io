@@ -1,3 +1,4 @@
+// script.js 整合更新版
 const video = document.getElementById('camera');
 const analyzeBtn = document.getElementById('analyzeBtn');
 const stopBtn = document.getElementById('stopBtn');
@@ -9,8 +10,13 @@ let stream;
 let interval;
 let logRGBValues = [];
 
+// 儲存框位置
+let redBoxPositions = {
+    redBox1: { left: 0, top: 0 },
+    redBox2: { left: 0, top: 0 },
+};
+
 async function startCamera() {
-    // 確保在 Safari 或 iOS 設定 playsinline
     video.setAttribute('playsinline', true);
     video.setAttribute('webkit-playsinline', true);
 
@@ -25,7 +31,6 @@ async function startCamera() {
         video.srcObject = stream;
         video.onloadedmetadata = () => {
             video.play();
-            adjustRedBoxPosition(); // 啟動時調整紅框位置
         };
         analyzeBtn.disabled = false;
         stopBtn.disabled = true;
@@ -36,37 +41,33 @@ async function startCamera() {
     }
 }
 
-function adjustRedBoxPosition() {
-    const videoRect = video.getBoundingClientRect();
-    const containerRect = document.querySelector('.container').getBoundingClientRect();
+function makeDraggable(box) {
+    let offsetX = 0, offsetY = 0, isDragging = false;
 
-    [redBox1, redBox2, redBox3].forEach((box, index) => {
-        const leftOffsets = [30, 50, 70]; // 紅框水平位置的百分比
-        const boxWidth = box.offsetWidth;
-        const boxHeight = box.offsetHeight;
-
-        box.style.left = `${videoRect.left + videoRect.width * (leftOffsets[index] / 100) - containerRect.left - boxWidth / 2}px`;
-        box.style.top = `${videoRect.top + videoRect.height / 2 - containerRect.top - boxHeight / 2}px`;
+    box.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        offsetX = e.clientX - box.getBoundingClientRect().left;
+        offsetY = e.clientY - box.getBoundingClientRect().top;
+        document.body.style.cursor = 'grabbing';
     });
-}
 
-video.addEventListener('loadedmetadata', adjustRedBoxPosition);
-window.addEventListener('resize', adjustRedBoxPosition);
+    document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const containerRect = document.querySelector('.container').getBoundingClientRect();
+        const left = e.clientX - containerRect.left - offsetX;
+        const top = e.clientY - containerRect.top - offsetY;
 
-// 原有其他程式碼保持不變
+        box.style.left = `${left}px`;
+        box.style.top = `${top}px`;
 
-async function toggleTorch(on) {
-    try {
-        const track = stream.getVideoTracks()[0];
-        const capabilities = track.getCapabilities();
-        if (capabilities.torch) {
-            await track.applyConstraints({
-                advanced: [{ torch: on }]
-            });
-        }
-    } catch (err) {
-        console.error("無法控制手電筒: ", err);
-    }
+        // 更新位置
+        redBoxPositions[box.id] = { left, top };
+    });
+
+    document.addEventListener('mouseup', () => {
+        isDragging = false;
+        document.body.style.cursor = 'default';
+    });
 }
 
 function getAverageColor(box) {
@@ -78,17 +79,20 @@ function getAverageColor(box) {
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
     const videoRect = video.getBoundingClientRect();
-    const boxRect = box.getBoundingClientRect();
+    const containerRect = document.querySelector('.container').getBoundingClientRect();
 
     const scaleX = video.videoWidth / videoRect.width;
     const scaleY = video.videoHeight / videoRect.height;
 
-    const boxX = (boxRect.left - videoRect.left) * scaleX;
-    const boxY = (boxRect.top - videoRect.top) * scaleY;
-    const boxWidth = boxRect.width * scaleX;
-    const boxHeight = boxRect.height * scaleY;
+    const boxLeft = redBoxPositions[box.id].left;
+    const boxTop = redBoxPositions[box.id].top;
+    const boxWidth = box.offsetWidth;
+    const boxHeight = box.offsetHeight;
 
-    const imageData = ctx.getImageData(boxX, boxY, boxWidth, boxHeight).data;
+    const boxX = (boxLeft + containerRect.left - videoRect.left) * scaleX;
+    const boxY = (boxTop + containerRect.top - videoRect.top) * scaleY;
+
+    const imageData = ctx.getImageData(boxX, boxY, boxWidth * scaleX, boxHeight * scaleY).data;
 
     let r = 0, g = 0, b = 0, count = 0;
     for (let i = 0; i < imageData.length; i += 4) {
@@ -125,8 +129,6 @@ analyzeBtn.addEventListener('click', async function () {
     stopBtn.disabled = false;
     analyzeBtn.disabled = true;
 
-    redBox1.classList.add('fixed');
-    redBox2.classList.add('fixed');
     await toggleTorch(true);
 
     interval = setInterval(() => {
@@ -166,7 +168,23 @@ stopBtn.addEventListener('click', function () {
     toggleTorch(false);
 });
 
+function toggleTorch(on) {
+    try {
+        const track = stream.getVideoTracks()[0];
+        const capabilities = track.getCapabilities();
+        if (capabilities.torch) {
+            track.applyConstraints({
+                advanced: [{ torch: on }]
+            });
+        }
+    } catch (err) {
+        console.error("無法控制手電筒: ", err);
+    }
+}
+
 startCamera();
+makeDraggable(redBox1);
+makeDraggable(redBox2);
 
 document.getElementById('startBtn').addEventListener('click', async () => {
     await startCamera();
