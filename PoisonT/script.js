@@ -33,7 +33,6 @@ async function startCamera() {
             video.play();
         };
         analyzeBtn.disabled = false;
-        stopBtn.disabled = true;
     } catch (err) {
         console.error("無法啟動攝像頭: ", err);
         result.innerHTML = `錯誤：無法啟動攝像頭。請檢查瀏覽器權限設置或設備支持性。${err.message}`;
@@ -41,106 +40,90 @@ async function startCamera() {
     }
 }
 
+function getAverageColor(box) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    const videoRect = video.getBoundingClientRect();
+    const containerRect = document.querySelector('.container').getBoundingClientRect();
+
+    const scaleX = video.videoWidth / videoRect.width;
+    const scaleY = video.videoHeight / videoRect.height;
+
+    const boxLeft = redBoxPositions[box.id].left;
+    const boxTop = redBoxPositions[box.id].top;
+    const boxWidth = box.offsetWidth;
+    const boxHeight = box.offsetHeight;
+
+    const boxX = (boxLeft + containerRect.left - videoRect.left) * scaleX;
+    const boxY = (boxTop + containerRect.top - videoRect.top) * scaleY;
+
+    const imageData = ctx.getImageData(boxX, boxY, boxWidth * scaleX, boxHeight * scaleY).data;
+
+    let r = 0, g = 0, b = 0, count = 0;
+    for (let i = 0; i < imageData.length; i += 4) {
+        r += imageData[i];
+        g += imageData[i + 1];
+        b += imageData[i + 2];
+        count++;
+    }
+
+    return { r: r / count, g: g / count, b: b / count };
+}
+
 function calculateSlope(data) {
-    let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
     let n = data.length;
-    
+    let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+
     for (let i = 0; i < n; i++) {
         sumX += data[i].time;
-        sumY += data[i].inhibitionRate;
-        sumXY += data[i].time * data[i].inhibitionRate;
-        sumXX += data[i].time * data[i].time;
+        sumY += data[i].value;
+        sumXY += data[i].time * data[i].value;
+        sumX2 += data[i].time * data[i].time;
     }
-    
-    let slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+
+    let slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
     return slope;
 }
 
-function calculateInhibitionRate(blank, sample) {
-    return ((blank - sample) / blank) * 100;
-}
-
-function makeDraggable(box) {
-    let offsetX = 0, offsetY = 0, isDragging = false;
-
-    function startDragging(e) {
-        isDragging = true;
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        offsetX = clientX - box.getBoundingClientRect().left;
-        offsetY = clientY - box.getBoundingClientRect().top;
-        document.body.style.cursor = 'grabbing';
-    }
-
-    function moveDragging(e) {
-        if (!isDragging) return;
-
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-        const containerRect = document.querySelector('.container').getBoundingClientRect();
-        const left = clientX - containerRect.left - offsetX;
-        const top = clientY - containerRect.top - offsetY;
-
-        box.style.left = `${left}px`;
-        box.style.top = `${top}px`;
-
-        redBoxPositions[box.id] = { left, top };
-    }
-
-    function stopDragging() {
-        isDragging = false;
-        document.body.style.cursor = 'default';
-    }
-
-    box.addEventListener('mousedown', startDragging);
-    box.addEventListener('touchstart', startDragging);
-
-    document.addEventListener('mousemove', moveDragging);
-    document.addEventListener('touchmove', moveDragging, { passive: false });
-
-    document.addEventListener('mouseup', stopDragging);
-    document.addEventListener('touchend', stopDragging);
+function calculateInhibition(blankBlue, sampleBlue) {
+    return ((blankBlue - sampleBlue) / blankBlue) * 100;
 }
 
 analyzeBtn.addEventListener('click', async function () {
     logRGBValues = [];
     let intervalCount = 0;
 
-    stopBtn.disabled = false;
     analyzeBtn.disabled = true;
 
     interval = setInterval(() => {
         const color1 = getAverageColor(redBox1);
         const color2 = getAverageColor(redBox2);
-        
-        let inhibitionRate = calculateInhibitionRate(color1.r, color2.r);
 
         logRGBValues.push({
             time: intervalCount * 10,
-            inhibitionRate: inhibitionRate
+            blankBlue: color1.b,
+            sampleBlue: color2.b
         });
 
+        const inhibitionRate = calculateInhibition(color1.b, color2.b);
         result.innerHTML = `
             時間: ${intervalCount * 10} 秒<br>
-            抑制率: ${inhibitionRate.toFixed(2)}%
+            空白組 B: ${color1.b.toFixed(3)}<br>
+            樣品組 B: ${color2.b.toFixed(3)}<br>
+            抑制率: ${inhibitionRate.toFixed(2)} %<br>
         `;
 
         intervalCount++;
-        if (intervalCount >= 361) {
+        if (intervalCount >= 30) { // 300 秒 / 10 秒
             clearInterval(interval);
-            let slope = calculateSlope(logRGBValues);
-            result.innerHTML += `<h3>斜率: ${slope.toFixed(3)}</h3>`;
             analyzeBtn.disabled = false;
-            stopBtn.disabled = true;
         }
     }, 10000);
 });
 
 startCamera();
-makeDraggable(redBox1);
-makeDraggable(redBox2);
-
-document.getElementById('startBtn').addEventListener('click', async () => {
-    await startCamera();
-});
