@@ -1,7 +1,6 @@
 // script.js 整合更新版
 const video = document.getElementById('camera');
 const analyzeBtn = document.getElementById('analyzeBtn');
-const stopBtn = document.getElementById('stopBtn');
 const result = document.getElementById('result');
 const redBox1 = document.getElementById('redBox1');
 const redBox2 = document.getElementById('redBox2');
@@ -40,6 +39,48 @@ async function startCamera() {
     }
 }
 
+function makeDraggable(box) {
+    let offsetX = 0, offsetY = 0, isDragging = false;
+
+    function startDragging(e) {
+        isDragging = true;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        offsetX = clientX - box.getBoundingClientRect().left;
+        offsetY = clientY - box.getBoundingClientRect().top;
+        document.body.style.cursor = 'grabbing';
+    }
+
+    function moveDragging(e) {
+        if (!isDragging) return;
+
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+        const containerRect = document.querySelector('.container').getBoundingClientRect();
+        const left = clientX - containerRect.left - offsetX;
+        const top = clientY - containerRect.top - offsetY;
+
+        box.style.left = `${left}px`;
+        box.style.top = `${top}px`;
+
+        // 更新位置
+        redBoxPositions[box.id] = { left, top };
+    }
+
+    function stopDragging() {
+        isDragging = false;
+        document.body.style.cursor = 'default';
+    }
+
+    box.addEventListener('mousedown', startDragging);
+    box.addEventListener('touchstart', startDragging);
+    document.addEventListener('mousemove', moveDragging);
+    document.addEventListener('touchmove', moveDragging, { passive: false });
+    document.addEventListener('mouseup', stopDragging);
+    document.addEventListener('touchend', stopDragging);
+}
+
 function getAverageColor(box) {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -75,25 +116,6 @@ function getAverageColor(box) {
     return { r: r / count, g: g / count, b: b / count };
 }
 
-function calculateSlope(data) {
-    let n = data.length;
-    let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
-
-    for (let i = 0; i < n; i++) {
-        sumX += data[i].time;
-        sumY += data[i].value;
-        sumXY += data[i].time * data[i].value;
-        sumX2 += data[i].time * data[i].time;
-    }
-
-    let slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
-    return slope;
-}
-
-function calculateInhibition(blankBlue, sampleBlue) {
-    return ((blankBlue - sampleBlue) / blankBlue) * 100;
-}
-
 analyzeBtn.addEventListener('click', async function () {
     logRGBValues = [];
     let intervalCount = 0;
@@ -104,13 +126,7 @@ analyzeBtn.addEventListener('click', async function () {
         const color1 = getAverageColor(redBox1);
         const color2 = getAverageColor(redBox2);
 
-        logRGBValues.push({
-            time: intervalCount * 10,
-            blankBlue: color1.b,
-            sampleBlue: color2.b
-        });
-
-        const inhibitionRate = calculateInhibition(color1.b, color2.b);
+        const inhibitionRate = ((color1.b - color2.b) / color1.b) * 100;
         result.innerHTML = `
             時間: ${intervalCount * 10} 秒<br>
             空白組 B: ${color1.b.toFixed(3)}<br>
@@ -119,7 +135,7 @@ analyzeBtn.addEventListener('click', async function () {
         `;
 
         intervalCount++;
-        if (intervalCount >= 30) { // 300 秒 / 10 秒
+        if (intervalCount >= 30) {
             clearInterval(interval);
             analyzeBtn.disabled = false;
         }
@@ -127,3 +143,5 @@ analyzeBtn.addEventListener('click', async function () {
 });
 
 startCamera();
+makeDraggable(redBox1);
+makeDraggable(redBox2);
