@@ -164,7 +164,7 @@ analyzeBtn.addEventListener('click', async function () {
         `;
 
         intervalCount++;
-        if (intervalCount >= 90) {
+        if (intervalCount > 90) {
             clearInterval(interval);
             result.innerHTML += `<h3>取樣結果 (每2秒):</h3>`;
             downloadExcel(logRGBValues);
