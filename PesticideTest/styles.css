@@ -217,3 +217,12 @@ button:hover {
     text-indent: -1.2em;
     padding-left: 1.2em;
 }
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    touch-action: none;
+    overscroll-behavior: contain;
+}
