@@ -7,46 +7,77 @@ body {
 .container {
     position: relative;
     display: inline-block;
+    width: 100%;
+    max-width: 400px;  /* 設置容器最大寬度 */
+    height: auto;  /* 讓容器自動調整高度 */
 }
 
 #camera {
-    width: 100%;
-    max-width: 400px;
+    width: 100%;  /* 攝像頭寬度充滿容器 */
+    height: auto; /* 高度根據寬度自適應 */
     border: 1px solid #ccc;
 }
 
 .redBox {
     position: absolute;
     border: 2px solid red;
-    pointer-events: none; /* 禁用紅框的點擊事件，使其不影響攝像頭預覽 */
+    width: 75px;
+    height: 30px;
+    cursor: move; /* 提示可以拖動 */
+    z-index: 10;
+    background-color: rgba(255, 0, 0, 0.2);
+}
+
+.container {
+    position: relative; /* 確保子元素的絕對定位以此為參考 */
+}
+
+#redBox1, #redBox2 {
+    width: 75px;
+    height: 30px;
+    position: absolute;
 }
 
 #redBox1 {
-    width: 30px;
-    height: 50px;
-    top: 50%;
-    left: 40%;
+    top: 50%;  /* 設置在攝像頭容器的中央 */
+    left: 30%;
+    transform: translate(-50%, -50%);  /* 保持紅框垂直和水平居中 */
+    position: absolute;
 }
 
 #redBox2 {
-    width: 30px;
-    height: 50px;
-    top: 50%;
-    left: 52.5%;
+    top: 25%;
+    left: 30%;
+    transform: translate(-50%, -50%);
+}
+
+/* 為手機設備進行特殊處理，調整紅框位置 */
+@media screen and (max-width: 768px) {
+    #redBox1 {
+        top: 50%;  /* 保持在容器中間 */
+        transform: translate(-50%, -45%);  /* 只在垂直方向上微調，稍微偏下 */
+    }
+}
+
+.redBox.fixed {
+    position: absolute;
+    pointer-events: none;
 }
 
 .boxLabel {
     position: absolute;
-    top: -25px; /* 將標籤放置在红框上方 */
-    left: 0;
-    width: 100%;
-    text-align: center;
-    font-size: 12px;
+    top: 125%;  /* 垂直居中 */
+    left: -15px;  /* 將標籤移到更靠近紅框的左側 */
+    transform: translateY(-50%) rotate(-90deg);  /* 垂直顯示標籤 */
+    transform-origin: left center;  /* 設置旋轉中心為左側 */
+    font-size: 10px;
     color: yellow;
-    background-color: rgba(100, 50, 100, 0.7); /* 半透明白色背景 */
-    padding: 2px;
+    background-color: rgba(100, 50, 100, 0.7);
+    padding: 2px 5px;
     border-radius: 3px;
+    text-align: center;
 }
+
 #analyzeBtn {
     margin-top: 20px;
     padding: 10px 20px;
@@ -60,6 +91,138 @@ body {
 }
 
 
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #f7fff5;
+    color: #333;
+}
+
+.hero {
+    position: relative;
+    width: 100%;
+    max-height: 250px;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.hero img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    filter: brightness(70%);
+}
+
+.hero-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-size: 28px;
+    font-weight: bold;
+    text-shadow: 1px 1px 5px #000;
+}
+
+h2 {
+    margin-top: 10px;
+    font-size: 24px;
+    color: #2c5f2d;
+}
+
+button {
+    background-color: #6ab04c;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    margin: 10px 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #4a943e;
+}
+
+#showStepsBtn {
+    background-color: #f5a623;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    margin: 10px 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#showStepsBtn:hover {
+    background-color: #d48806;
+}
+
+/* Modal 樣式 */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    padding-top: 60px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
 
 
+.modal-content {
+    background-color: #fff;
+    margin: auto;
+    padding: 20px 25px;
+    border-radius: 10px;
+    width: 400px;
+    max-width: 90%;
+    max-height: 80%;
+    overflow-y: auto;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    position: relative;
+    font-size: 15px;
+}
 
+
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 24px;
+    font-weight: bold;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    cursor: pointer;
+}
+
+.close-button:hover {
+    color: #000;
+}
+
+.modal-content ol {
+    padding-left: 1.2em;
+    margin: 0;
+    list-style-position: inside;
+}
+
+.modal-content li {
+    margin: 8px 0;
+    text-indent: -1.2em;
+    padding-left: 1.2em;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    touch-action: none;
+    overscroll-behavior: contain;
+}
