@@ -8,12 +8,12 @@ body {
     position: relative;
     display: inline-block;
     width: 100%;
-    max-width: 400px;
+    max-width: 320px;
     height: auto;
 }
 
 #camera {
-    width: 100%;
+    width: 80%;
     height: auto;
     border: 1px solid #ccc;
 }
