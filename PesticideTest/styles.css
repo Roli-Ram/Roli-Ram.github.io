@@ -246,3 +246,16 @@ button:hover {
     z-index: 1000;
     pointer-events: none; /* 防止點到它干擾其他操作 */
 }
+
+.footer-image {
+    width: 100vw;          
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.footer-image img {
+    width: 100%;
+    height: auto;         
+    display: block;
+}
