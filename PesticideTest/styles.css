@@ -43,6 +43,17 @@ html, body {
     z-index: 2;
 }
 
+.title-image {
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.title-image img {
+    max-width: 300px; /* 避免太大 */
+    height: auto;
+}
+
 /* 手機調整文字大小 */
 @media screen and (max-width: 768px) {
     .hero-text {
