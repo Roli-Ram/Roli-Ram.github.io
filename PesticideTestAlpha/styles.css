@@ -12,11 +12,7 @@ body {
     height: auto;
 }
 
-#camera {
-    width: 100%;
-    height: auto;
-    border: 1px solid #ccc;
-}
+
 
 .redBox {
     position: absolute;
@@ -85,4 +81,12 @@ body {
     height: auto !important;
     max-width: 100%;
     margin-top: 20px;
+}
+
+
+#camera {
+    width: 100%;
+    max-width: 480px;
+    height: auto;
+    border: 1px solid #ccc;
 }
