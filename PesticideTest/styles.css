@@ -211,7 +211,7 @@ button:hover {
     padding-left: 1.2em;
 }
 
-.usr-version {
+.usr-version-display {
     position: fixed;
     right: 10px;
     bottom: 10px;
