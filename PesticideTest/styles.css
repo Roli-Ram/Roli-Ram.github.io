@@ -47,7 +47,6 @@ html, body {
 .header-row {
     display: flex;
     align-items: center;
-    justify-content: space-between; /* 兩邊靠邊，中間留空 */
     padding: 0 20px;
     max-width: 800px;
     margin: 0 auto;
@@ -81,12 +80,14 @@ html, body {
 /* --- 攝影畫面與限制高度 --- */
 #camera {
     width: 100%;
-    aspect-ratio: 4 / 3;         
-    max-height: 300px;          
-    object-fit: cover;
-    display: block;
+    max-width: 640px;
+    aspect-ratio: 4 / 3;
+    background-color: black;
     border: 1px solid #ccc;
+    display: block;
+    margin: 0 auto;
 }
+
 
 /* --- 紅框區塊 --- */
 .redBox {
