@@ -223,7 +223,7 @@ button:hover {
     padding-left: 1.2em;
 }
 
-.usr-hub {
+.usr-version {
     position: fixed;
     right: 10px;
     bottom: 10px;
@@ -235,18 +235,4 @@ button:hover {
     font-family: sans-serif;
     z-index: 1000;
     pointer-events: none; /* 防止點到它干擾其他操作 */
-}
-
-.hero-text {
-    font-size: 28px;
-    font-weight: bold;
-    text-align: center;
-    line-height: 1.4;
-    padding: 0 20px;
-    word-wrap: break-word;
-    white-space: normal;
-
-    margin-bottom: 20px;  
-    z-index: 1;           
-    position: relative;
 }
