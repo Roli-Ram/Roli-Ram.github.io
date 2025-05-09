@@ -10,6 +10,50 @@ let stream;
 let interval;
 let logRGBValues = [];
 
+let blueChart;
+
+function initChart() {
+    const ctx = document.getElementById('blueChart').getContext('2d');
+    blueChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [
+                {
+                    label: '空白組 B',
+                    data: [],
+                    borderColor: 'blue',
+                    borderWidth: 2,
+                    fill: false
+                },
+                {
+                    label: '樣品組 B',
+                    data: [],
+                    borderColor: 'purple',
+                    borderWidth: 2,
+                    fill: false
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            animation: false,
+            scales: {
+                x: { title: { display: true, text: '時間 (秒)' } },
+                y: { title: { display: true, text: 'B 通道值' }, min: 0, max: 255 }
+            }
+        }
+    });
+}
+
+function updateChart(time, b1, b2) {
+    blueChart.data.labels.push(time);
+    blueChart.data.datasets[0].data.push(b1);
+    blueChart.data.datasets[1].data.push(b2);
+    blueChart.update();
+}
+
+
 // 儲存框位置
 let redBoxPositions = {
     redBox1: { left: 0, top: 0 },
@@ -31,22 +75,12 @@ async function startCamera() {
         video.srcObject = stream;
         video.onloadedmetadata = () => {
             video.play();
-        setTimeout(() => {
-            const color1 = getAverageColor(redBox1);
-            const color2 = getAverageColor(redBox2);
-
-            result.innerHTML = `
-                當前 RGB 預覽（尚未開始分析）:<br>
-                空白組: (${color1.r.toFixed(3)}, ${color1.g.toFixed(3)}, ${color1.b.toFixed(3)})<br>
-                樣品組: (${color2.r.toFixed(3)}, ${color2.g.toFixed(3)}, ${color2.b.toFixed(3)})<br>
-            `;
-        }, 500);
-
         };
         analyzeBtn.disabled = false;
         stopBtn.disabled = true;
     } catch (err) {
         console.error("無法啟動攝像頭: ", err);
+        updateChart(intervalCount * 2, color1.b, color2.b);
         result.innerHTML = `錯誤：無法啟動攝像頭。請檢查瀏覽器權限設置或設備支持性。${err.message}`;
         analyzeBtn.disabled = true;
     }
@@ -157,6 +191,7 @@ analyzeBtn.addEventListener('click', async function () {
     analyzeBtn.disabled = true;
 
     await toggleTorch(true);
+    if (!blueChart) initChart();
 
     function record() {
         const color1 = getAverageColor(redBox1);
@@ -168,6 +203,7 @@ analyzeBtn.addEventListener('click', async function () {
             color2: { r: color2.r.toFixed(3), g: color2.g.toFixed(3), b: color2.b.toFixed(3) }
         });
 
+        updateChart(intervalCount * 2, color1.b, color2.b);
         result.innerHTML = `
             時間: ${intervalCount * 2} 秒<br>
             空白組 RGB: (${color1.r.toFixed(3)}, ${color1.g.toFixed(3)}, ${color1.b.toFixed(3)})<br>
