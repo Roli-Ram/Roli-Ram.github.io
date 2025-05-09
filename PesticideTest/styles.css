@@ -37,6 +37,15 @@ html, body {
     text-shadow: 1px 1px 5px #000;
 }
 
+@media screen and (max-width: 768px) {
+    .hero-text {
+        font-size: 20px;
+        line-height: 1.4;
+        padding: 0 10px;
+        text-align: center;
+    }
+}
+
 /* --- 主容器 --- */
 .container {
     position: relative;
