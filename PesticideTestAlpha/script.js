@@ -32,9 +32,7 @@ async function startCamera() {
         video.onloadedmetadata = () => {
             video.play();
         };
-        document.body.style.overflow = '';  // 解鎖滾動
-            document.body.style.overflow = '';  // 解鎖滾動
-    analyzeBtn.disabled = false;
+        analyzeBtn.disabled = false;
         stopBtn.disabled = true;
     } catch (err) {
         console.error("無法啟動攝像頭: ", err);
@@ -145,7 +143,6 @@ analyzeBtn.addEventListener('click', async function () {
     let intervalCount = 0;
 
     stopBtn.disabled = false;
-    document.body.style.overflow = 'hidden';  // 鎖定滾動
     analyzeBtn.disabled = true;
 
     await toggleTorch(true);
@@ -171,9 +168,7 @@ analyzeBtn.addEventListener('click', async function () {
             clearInterval(interval);
             result.innerHTML += `<h3>取樣結果 (每2秒):</h3>`;
             downloadExcel(logRGBValues);
-            document.body.style.overflow = '';  // 解鎖滾動
-            document.body.style.overflow = '';  // 解鎖滾動
-    analyzeBtn.disabled = false;
+            analyzeBtn.disabled = false;
             stopBtn.disabled = true;
             toggleTorch(false);
         }
@@ -184,12 +179,9 @@ analyzeBtn.addEventListener('click', async function () {
 });
 
 stopBtn.addEventListener('click', function () {
-    document.body.style.overflow = '';  // 解鎖滾動
     clearInterval(interval);
     result.innerHTML += `<h3>取樣已提前結束</h3>`;
     downloadExcel(logRGBValues);
-    document.body.style.overflow = '';  // 解鎖滾動
-            document.body.style.overflow = '';  // 解鎖滾動
     analyzeBtn.disabled = false;
     stopBtn.disabled = true;
     toggleTorch(false);
