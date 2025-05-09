@@ -23,6 +23,7 @@ html, body {
     width: 100%;
     height: auto;
     object-fit: cover;
+    display: block;
     filter: brightness(70%);
 }
 
@@ -31,20 +32,24 @@ html, body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    color: #fff;
     font-size: 28px;
+    color: white;
     font-weight: bold;
-    text-shadow: 1px 1px 5px #000;
+    text-shadow: 1px 1px 4px #000;
+    text-align: center;
+    width: 90%;
+    line-height: 1.4;
+    word-break: break-word;
+    z-index: 2;
 }
 
+/* 手機調整文字大小 */
 @media screen and (max-width: 768px) {
     .hero-text {
-        font-size: 20px;
-        line-height: 1.4;
-        padding: 0 10px;
-        text-align: center;
+        font-size: 18px;
     }
 }
+
 
 /* --- 主容器 --- */
 .container {
