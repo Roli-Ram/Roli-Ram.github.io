@@ -251,7 +251,6 @@ button:hover {
     background-image: url('images/USRHub.png');
     background-size: cover;
     background-position: center;
-    width: 100vw;
-    height: 100px;
-    margin-top: 30px;
+    color: white;
+    padding: 80px 20px;
 }
