@@ -31,6 +31,17 @@ async function startCamera() {
         video.srcObject = stream;
         video.onloadedmetadata = () => {
             video.play();
+        setTimeout(() => {
+            const color1 = getAverageColor(redBox1);
+            const color2 = getAverageColor(redBox2);
+
+            result.innerHTML = `
+                當前 RGB 預覽（尚未開始分析）:<br>
+                空白組: (${color1.r.toFixed(3)}, ${color1.g.toFixed(3)}, ${color1.b.toFixed(3)})<br>
+                樣品組: (${color2.r.toFixed(3)}, ${color2.g.toFixed(3)}, ${color2.b.toFixed(3)})<br>
+            `;
+        }, 500);
+
         };
         analyzeBtn.disabled = false;
         stopBtn.disabled = true;
