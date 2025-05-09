@@ -50,8 +50,8 @@ html, body {
 /* --- 攝影畫面與限制高度 --- */
 #camera {
     width: 100%;
-    aspect-ratio: 4 / 3;         /* 鎖定 4:3 比例，防止變形 */
-    max-height: 300px;          /* 限制相機最高不超過畫面 */
+    aspect-ratio: 4 / 3;         
+    max-height: 300px;          
     object-fit: cover;
     display: block;
     border: 1px solid #ccc;
@@ -212,14 +212,16 @@ button:hover {
     pointer-events: none; /* 防止點到它干擾其他操作 */
 }
 
-/* 手機版標題自動換行 + 字縮小 */
-@media screen and (max-width: 768px) {
-    h1, .hero-text {
-        font-size: 20px;
-        word-break: break-word;
-        white-space: normal;
-        line-height: 1.4;
-        text-align: center;
-        padding: 0 10px;
-    }
+.hero-text {
+    font-size: 28px;
+    font-weight: bold;
+    text-align: center;
+    line-height: 1.4;
+    padding: 0 20px;
+    word-wrap: break-word;
+    white-space: normal;
+
+    margin-bottom: 20px;  
+    z-index: 1;           
+    position: relative;
 }
