@@ -5,26 +5,87 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>攝像頭顏色分析</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 </head>
 <body>
-    <h1>農藥顏色分析定量</h1>
-    <div class="container">
-    <video id="camera" autoplay></video>
 
-    <!-- 紅框1 -->
-    <div id="redBox1" class="redBox">
-	<span class="boxLabel">標準</span> 
-	</div>
-    
-    <!-- 紅框2 -->
-    <div id="redBox2" class="redBox">
-	<span class="boxLabel">樣品</span> 
-	</div>
-
-    <button id="analyzeBtn">分析</button>
-    <p id="result">RGB: (R, G, B)</p>
+<div class="hero">
+    <img src="https://images.unsplash.com/photo-1572441710565-1e90a46189a1?auto=format&fit=crop&w=1200&q=80" alt="蔬果背景圖">
+    <div class="hero-text">蔬果影像分析平台</div>
 </div>
 
+    <h2>農藥抑制率分析</h2>
+    <div id="version" class="version-display">版本號: v1.1.0</div>
+    <div class="start-button-wrapper">
+        <button id="startBtn">啟動攝像頭</button>
+    </div>
+
+    <div class="container">
+        <video id="camera" autoplay playsinline muted></video>
+
+        <!-- 紅框部分 -->
+        <div id="redBox1" class="redBox">
+            <span class="boxLabel">空白組</span>
+        </div>
+        <div id="redBox2" class="redBox">
+            <span class="boxLabel">樣品組</span>
+        </div>
+    </div>
+
+    <!-- 按鈕放 container 外部 -->
+    <div class="button-group">
+        <button id="analyzeBtn">分析</button>
+        <button id="showStepsBtn">查看步驟</button>
+        <button id="stopBtn">提前結束</button>
+    </div>
+    <p id="result">RGB: (R, G, B)</p>
     <script src="script.js"></script>
+
+<script>
+document.getElementById('showStepsBtn').addEventListener('click', () => {
+    document.getElementById('stepsModal').style.display = 'block';
+});
+});
+</script>
+
+
+
+<div id="stepsModal" class="modal">
+  <div class="modal-content">
+    <span class="close-button" id="closeStepsBtn">&times;</span>
+    <div class="modal-steps">
+        <h3 style="text-align:center; color:#2c5f2d;">實驗步驟</h3>
+        <ol>
+  <li>將大約 1 公克的蔬果樣品浸泡至 75% 酒精中。</li>
+  <li>搖晃 20 秒後靜置 3 分鐘。</li>
+  <li>取出兩根小管放入白色架中，並將其中一管加入一滴蔬果浸泡液。</li>
+  <li>將手機架好並使其紅框對準架上兩根小管。</li>
+  <li>樣品組紅框對準滴入蔬果浸泡液的小管；空白組對準沒滴入的。</li>
+  <li>取出一根酵素棒，並將其與 3 毫升水混合成酵素液。</li>
+  <li>將酵素液分成兩半，分別加入小管。</li>
+  <li>按下開始分析並等待結果。</li>
+</ol>
+    </div>
+  </div>
+</div>
+
+</div>
+
+
+<script>
+document.getElementById('showStepsBtn').addEventListener('click', () => {
+    document.getElementById('stepsModal').style.display = 'block';
+});
+document.getElementById('closeStepsBtn').addEventListener('click', () => {
+    document.getElementById('stepsModal').style.display = 'none';
+});
+window.addEventListener('click', (event) => {
+    const modal = document.getElementById('stepsModal');
+    if (event.target === modal) {
+        modal.style.display = 'none';
+    }
+});
+</script>
+
 </body>
 </html>
