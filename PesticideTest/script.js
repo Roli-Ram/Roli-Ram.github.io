@@ -46,10 +46,18 @@ function makeDraggable(box) {
 
     function startDragging(e) {
         isDragging = true;
+
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        offsetX = clientX - box.getBoundingClientRect().left;
-        offsetY = clientY - box.getBoundingClientRect().top;
+
+        const parentRect = box.offsetParent.getBoundingClientRect();
+        const boxRect = box.getBoundingClientRect();
+
+        offsetX = clientX - boxRect.left;
+        offsetY = clientY - boxRect.top;
+
+        e.preventDefault();
+        e.stopPropagation();
         document.body.style.cursor = 'grabbing';
     }
 
@@ -59,15 +67,32 @@ function makeDraggable(box) {
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
-        const containerRect = document.querySelector('.container').getBoundingClientRect();
-        const left = clientX - containerRect.left - offsetX;
-        const top = clientY - containerRect.top - offsetY;
+        const parent = box.offsetParent;
+        const camera = document.getElementById('camera');
+        const parentRect = parent.getBoundingClientRect();
+        const cameraRect = camera.getBoundingClientRect();
 
-        box.style.left = `${left}px`;
-        box.style.top = `${top}px`;
+        const cameraOffsetLeft = cameraRect.left - parentRect.left;
+        const cameraOffsetTop = cameraRect.top - parentRect.top;
 
-        // 更新位置
-        redBoxPositions[box.id] = { left, top };
+        const boxWidth = box.offsetWidth;
+        const boxHeight = box.offsetHeight;
+
+        const rawLeft = clientX - parentRect.left - offsetX;
+        const rawTop = clientY - parentRect.top - offsetY;
+
+        const minLeft = cameraOffsetLeft;
+        const maxLeft = cameraOffsetLeft + camera.offsetWidth - boxWidth;
+        const minTop = cameraOffsetTop;
+        const maxTop = cameraOffsetTop + camera.offsetHeight - boxHeight;
+
+        const newLeft = Math.max(minLeft, Math.min(rawLeft, maxLeft));
+        const newTop = Math.max(minTop, Math.min(rawTop, maxTop));
+
+        box.style.left = `${newLeft}px`;
+        box.style.top = `${newTop}px`;
+
+        redBoxPositions[box.id] = { left: newLeft, top: newTop };
     }
 
     function stopDragging() {
@@ -75,13 +100,10 @@ function makeDraggable(box) {
         document.body.style.cursor = 'default';
     }
 
-    // 框的拖動事件監聽
     box.addEventListener('mousedown', startDragging);
     box.addEventListener('touchstart', startDragging);
-
     document.addEventListener('mousemove', moveDragging);
     document.addEventListener('touchmove', moveDragging, { passive: false });
-
     document.addEventListener('mouseup', stopDragging);
     document.addEventListener('touchend', stopDragging);
 }
