@@ -50,8 +50,8 @@ html, body {
 }
 
 .title-image img {
-    max-width: 300px; /* 避免太大 */
-    height: auto;
+    width: 100%; /* 避免太大 */
+    height: 20%;
 }
 
 /* 手機調整文字大小 */
