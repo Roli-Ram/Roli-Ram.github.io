@@ -1,88 +1,229 @@
+// script.js 整合更新版
 const video = document.getElementById('camera');
 const analyzeBtn = document.getElementById('analyzeBtn');
+const stopBtn = document.getElementById('stopBtn');
 const result = document.getElementById('result');
-
-// 紅框元素
 const redBox1 = document.getElementById('redBox1');
 const redBox2 = document.getElementById('redBox2');
 
-// 啟動攝像頭
+let stream;
+let interval;
+let logRGBValues = [];
+
+// 儲存框位置
+let redBoxPositions = {
+    redBox1: { left: 0, top: 0 },
+    redBox2: { left: 0, top: 0 },
+};
+
 async function startCamera() {
+    video.setAttribute('playsinline', true);
+    video.setAttribute('webkit-playsinline', true);
+
     try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-            video: { 
-                facingMode: 'environment' // 優先使用後置攝像頭
-            } 
-        });
+        const constraints = {
+            video: { facingMode: 'environment' }
+        };
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            throw new Error("瀏覽器不支持 getUserMedia");
+        }
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
         video.srcObject = stream;
         video.onloadedmetadata = () => {
             video.play();
         };
         analyzeBtn.disabled = false;
+        stopBtn.disabled = true;
     } catch (err) {
         console.error("無法啟動攝像頭: ", err);
-        result.innerHTML = `錯誤：無法啟動攝像頭。${err.message}`;
+        result.innerHTML = `錯誤：無法啟動攝像頭。請檢查瀏覽器權限設置或設備支持性。${err.message}`;
         analyzeBtn.disabled = true;
     }
 }
 
-// 初始化
-startCamera();
+function makeDraggable(box) {
+    let offsetX = 0, offsetY = 0, isDragging = false;
 
-// 計算指定框中的顏色平均值
+    function startDragging(e) {
+        isDragging = true;
+
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+        const parentRect = box.offsetParent.getBoundingClientRect();
+        const boxRect = box.getBoundingClientRect();
+
+        offsetX = clientX - boxRect.left;
+        offsetY = clientY - boxRect.top;
+
+        e.preventDefault();
+        e.stopPropagation();
+        document.body.style.cursor = 'grabbing';
+    }
+
+    function moveDragging(e) {
+        if (!isDragging) return;
+
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+        const parent = box.offsetParent;
+        const camera = document.getElementById('camera');
+        const parentRect = parent.getBoundingClientRect();
+        const cameraRect = camera.getBoundingClientRect();
+
+        const cameraOffsetLeft = cameraRect.left - parentRect.left;
+        const cameraOffsetTop = cameraRect.top - parentRect.top;
+
+        const boxWidth = box.offsetWidth;
+        const boxHeight = box.offsetHeight;
+
+        const rawLeft = clientX - parentRect.left - offsetX;
+        const rawTop = clientY - parentRect.top - offsetY;
+
+        const minLeft = cameraOffsetLeft;
+        const maxLeft = cameraOffsetLeft + camera.offsetWidth - boxWidth;
+        const minTop = cameraOffsetTop;
+        const maxTop = cameraOffsetTop + camera.offsetHeight - boxHeight;
+
+        const newLeft = Math.max(minLeft, Math.min(rawLeft, maxLeft));
+        const newTop = Math.max(minTop, Math.min(rawTop, maxTop));
+
+        box.style.left = `${newLeft}px`;
+        box.style.top = `${newTop}px`;
+
+        redBoxPositions[box.id] = { left: newLeft, top: newTop };
+    }
+
+    function stopDragging() {
+        isDragging = false;
+        document.body.style.cursor = 'default';
+    }
+
+    box.addEventListener('mousedown', startDragging);
+    box.addEventListener('touchstart', startDragging);
+    document.addEventListener('mousemove', moveDragging);
+    document.addEventListener('touchmove', moveDragging, { passive: false });
+    document.addEventListener('mouseup', stopDragging);
+    document.addEventListener('touchend', stopDragging);
+}
+
 function getAverageColor(box) {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
-    
-    // 設定 canvas 大小為攝像頭畫面的解析度
+
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-    // 將攝像頭畫面繪製到 canvas
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // 取得視頻框的邊界和紅框的邊界
     const videoRect = video.getBoundingClientRect();
-    const boxRect = box.getBoundingClientRect();
+    const containerRect = document.querySelector('.container').getBoundingClientRect();
 
-    // 計算視頻的縮放比例（因為視頻的解析度和顯示大小可能不同）
     const scaleX = video.videoWidth / videoRect.width;
     const scaleY = video.videoHeight / videoRect.height;
 
-    // 計算紅框在視頻上的座標與大小
-    const boxX = (boxRect.left - videoRect.left) * scaleX;
-    const boxY = (boxRect.top - videoRect.top) * scaleY;
-    const boxWidth = boxRect.width * scaleX;
-    const boxHeight = boxRect.height * scaleY;
+    const boxLeft = redBoxPositions[box.id].left;
+    const boxTop = redBoxPositions[box.id].top;
+    const boxWidth = box.offsetWidth;
+    const boxHeight = box.offsetHeight;
 
-    // 取得紅框內的像素數據
-    const imageData = ctx.getImageData(boxX, boxY, boxWidth, boxHeight).data;
+    const boxX = (boxLeft + containerRect.left - videoRect.left) * scaleX;
+    const boxY = (boxTop + containerRect.top - videoRect.top) * scaleY;
 
-    // 計算紅框內的 RGB 平均值
+    const imageData = ctx.getImageData(boxX, boxY, boxWidth * scaleX, boxHeight * scaleY).data;
+
     let r = 0, g = 0, b = 0, count = 0;
     for (let i = 0; i < imageData.length; i += 4) {
-        r += imageData[i];     // Red
-        g += imageData[i + 1]; // Green
-        b += imageData[i + 2]; // Blue
+        r += imageData[i];
+        g += imageData[i + 1];
+        b += imageData[i + 2];
         count++;
     }
 
-    // 回傳紅框內的平均 RGB 顏色
     return { r: r / count, g: g / count, b: b / count };
 }
 
-// 點擊「分析」按鈕時，計算三個紅框的 RGB 值並分別顯示
-analyzeBtn.addEventListener('click', function() {
-    // 分別取得每個紅框的平均 RGB
-    const color1 = getAverageColor(redBox1);
-    const color2 = getAverageColor(redBox2);
-	
-// 計算濃度
-    const o3D = color2.b/color1.b
+function downloadExcel(logRGBValues) {
+    const wb = XLSX.utils.book_new();
+    const wsData = [["Time (s)", "Blank R", "Blank G", "Blank B", "Sample R", "Sample G", "Sample B"]];
 
-    // 分別顯示三個紅框的 RGB 結果
-    result.innerHTML = `
-        標準品 RGB: (${color1.r.toFixed(3)}, ${color1.g.toFixed(3)}, ${color1.b.toFixed(3)})<br>
-        樣品 RGB: (${color2.r.toFixed(3)}, ${color2.g.toFixed(3)}, ${color2.b.toFixed(3)})<br>
-		農藥濃度: ${o3D.toFixed(3)} ppm
-    `;
+    logRGBValues.forEach(entry => {
+        wsData.push([
+            entry.time,
+            entry.color1.r, entry.color1.g, entry.color1.b,
+            entry.color2.r, entry.color2.g, entry.color2.b
+        ]);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    XLSX.utils.book_append_sheet(wb, ws, "RGB Data");
+    XLSX.writeFile(wb, "rgb_results.xlsx");
+}
+
+analyzeBtn.addEventListener('click', async function () {
+    logRGBValues = [];
+    let intervalCount = 0;
+
+    stopBtn.disabled = false;
+    analyzeBtn.disabled = true;
+
+    await toggleTorch(true);
+
+    interval = setInterval(() => {
+        const color1 = getAverageColor(redBox1);
+        const color2 = getAverageColor(redBox2);
+
+        logRGBValues.push({
+            time: intervalCount * 10,
+            color1: { r: color1.r.toFixed(3), g: color1.g.toFixed(3), b: color1.b.toFixed(3) },
+            color2: { r: color2.r.toFixed(3), g: color2.g.toFixed(3), b: color2.b.toFixed(3) }
+        });
+
+        result.innerHTML = `
+            時間: ${intervalCount * 10} 秒<br>
+            空白組 RGB: (${color1.r.toFixed(3)}, ${color1.g.toFixed(3)}, ${color1.b.toFixed(3)})<br>
+            樣品組 RGB: (${color2.r.toFixed(3)}, ${color2.g.toFixed(3)}, ${color2.b.toFixed(3)})<br>
+        `;
+
+        intervalCount++;
+        if (intervalCount >= 361) {
+            clearInterval(interval);
+            result.innerHTML += `<h3>取樣結果 (每10秒):</h3>`;
+            downloadExcel(logRGBValues);
+            analyzeBtn.disabled = false;
+            stopBtn.disabled = true;
+            toggleTorch(false);
+        }
+    }, 10000);
+});
+
+stopBtn.addEventListener('click', function () {
+    clearInterval(interval);
+    result.innerHTML += `<h3>取樣已提前結束</h3>`;
+    downloadExcel(logRGBValues);
+    analyzeBtn.disabled = false;
+    stopBtn.disabled = true;
+    toggleTorch(false);
+});
+
+function toggleTorch(on) {
+    try {
+        const track = stream.getVideoTracks()[0];
+        const capabilities = track.getCapabilities();
+        if (capabilities.torch) {
+            track.applyConstraints({
+                advanced: [{ torch: on }]
+            });
+        }
+    } catch (err) {
+        console.error("無法控制手電筒: ", err);
+    }
+}
+
+startCamera();
+makeDraggable(redBox1);
+makeDraggable(redBox2);
+
+document.getElementById('startBtn').addEventListener('click', async () => {
+    await startCamera();
 });
