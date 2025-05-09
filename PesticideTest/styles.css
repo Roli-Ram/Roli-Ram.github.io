@@ -246,11 +246,3 @@ button:hover {
     z-index: 1000;
     pointer-events: none; /* 防止點到它干擾其他操作 */
 }
-
-.footer-image {
-    background-image: url('images/USRHub.png');
-    background-size: cover;
-    background-position: center;
-    color: white;
-    padding: 80px 20px;
-}
