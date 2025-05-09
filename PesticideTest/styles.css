@@ -211,3 +211,15 @@ button:hover {
     z-index: 1000;
     pointer-events: none; /* 防止點到它干擾其他操作 */
 }
+
+/* 手機版標題自動換行 + 字縮小 */
+@media screen and (max-width: 768px) {
+    h1, .hero-text {
+        font-size: 20px;
+        word-break: break-word;
+        white-space: normal;
+        line-height: 1.4;
+        text-align: center;
+        padding: 0 10px;
+    }
+}
