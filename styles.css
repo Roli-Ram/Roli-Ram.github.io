@@ -60,6 +60,7 @@ html, body {
 /* --- 紅框區塊 --- */
 .redBox {
     position: absolute;
+    pointer-events: auto;
     border: 2px solid red;
     width: 75px;
     height: 30px;
@@ -75,15 +76,13 @@ html, body {
 }
 
 #redBox1 {
-    top: 50%;
-    left: 30%;
-    transform: translate(-50%, -50%);
+    top: 150px;
+    left: 100px;
 }
 
 #redBox2 {
-    top: 25%;
-    left: 30%;
-    transform: translate(-50%, -50%);
+    top: 50px;
+    left: 100px;
 }
 
 /* 手機微調紅框位置 */
