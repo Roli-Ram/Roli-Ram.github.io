@@ -140,7 +140,6 @@ function getAverageColor(box) {
         count++;
     }
 
-    return { r: r / count, g: g / count, b: b / count };
 }
 
 
@@ -228,7 +227,6 @@ function calculateQuartiles(values) {
     values.sort((a, b) => a - b);
     const q1 = values[Math.floor((values.length - 1) * 0.25)];
     const q2 = values[Math.floor((values.length - 1) * 0.5)];
-    return { q1: q1.toFixed(3), q2: q2.toFixed(3) };
 }
 
 
@@ -261,7 +259,6 @@ function calculatePercentageReduction(b1Stats, b2Stats) {
         const n1 = parseFloat(qB1);
         const n2 = parseFloat(qB2);
         if (n1 === 0) return null;
-        return (1 - (n2 / n1)) * 100;
     }
 
     const q1Raw = safePercent(b1Stats.q1, b2Stats.q1);
