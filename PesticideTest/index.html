@@ -34,6 +34,7 @@
         <button id="backBtn">返回上一頁</button>
         <button id="showStepsBtn">查看步驟</button>
         <button id="analyzeBtn">分析</button>
+        <button id="stopBtn" style="display:none;">停止分析</button>
     </div>
     <p id="result"></p>
     <script src="script.js"></script>
@@ -72,6 +73,8 @@ document.getElementById('showStepsBtn').addEventListener('click', () => {
 </div>
 
 <script>
+if (stopBtn) stopBtn.disabled = true;
+    
 document.getElementById('backBtn').addEventListener('click', () => {
     window.history.back();
 });
@@ -90,7 +93,7 @@ window.addEventListener('click', (event) => {
 });
 </script>
 
-<div id="version" class="version-display">版本號: v1.512.1808-sw</div>
+<div id="version" class="version-display">版本號: v1.512.1812-sw</div>
 
 </body>
 </html>
