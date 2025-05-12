@@ -194,14 +194,6 @@ if (prev) {
     }, 2000);
 });
 
-stopBtn.addEventListener('click', function () {
-    clearInterval(interval);
-    result.innerHTML += `<h3>取樣已提前結束</h3>`;    analyzeBtn.disabled = false;
-    stopBtn.disabled = true;
-    toggleTorch(false);
-    showQuartiles();
-});
-
 function toggleTorch(on) {
     try {
         const track = stream.getVideoTracks()[0];
