@@ -81,6 +81,7 @@ async function startCamera() {
     } catch (err) {
         console.error("無法啟動攝像頭: ", err);
         
+        updateChart(intervalCount * 2, color1.b, color2.b);
         result.innerHTML = `錯誤：無法啟動攝像頭。請檢查瀏覽器權限設置或設備支持性。${err.message}`;
         analyzeBtn.disabled = true;
     }
@@ -184,6 +185,7 @@ function downloadExcel(logRGBValues) {
 }
 
 analyzeBtn.addEventListener('click', async function () {
+    if (!blueChart) initChart();
     logRGBValues = [];
     let intervalCount = 0;
 
@@ -204,6 +206,7 @@ analyzeBtn.addEventListener('click', async function () {
         });
 
         
+        updateChart(intervalCount * 2, color1.b, color2.b);
         result.innerHTML = `
             時間: ${intervalCount * 2} 秒<br>
             空白組 RGB: (${color1.r.toFixed(3)}, ${color1.g.toFixed(3)}, ${color1.b.toFixed(3)})<br>
