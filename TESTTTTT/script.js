@@ -187,7 +187,7 @@ if (prev) {
         intervalCount++;
         if (intervalCount >= 91) {
             clearInterval(interval);
-            result.innerHTML += `<h3>取樣結果 (每10秒):</h3>`;            analyzeBtn.disabled = false;
+            result.innerHTML += `<h3>取樣結果 (每2秒):</h3>`;            analyzeBtn.disabled = false;
             stopBtn.disabled = true;
             toggleTorch(false);
         }
