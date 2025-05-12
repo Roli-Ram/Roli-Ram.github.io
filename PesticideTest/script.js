@@ -143,22 +143,7 @@ function getAverageColor(box) {
     return { r: r / count, g: g / count, b: b / count };
 }
 
-function downloadExcel(logRGBValues) {
-    const wb = XLSX.utils.book_new();
-    const wsData = [["Time (s)", "Blank R", "Blank G", "Blank B", "Sample R", "Sample G", "Sample B"]];
 
-    logRGBValues.forEach(entry => {
-        wsData.push([
-            entry.time,
-            entry.color1.r, entry.color1.g, entry.color1.b,
-            entry.color2.r, entry.color2.g, entry.color2.b
-        ]);
-    });
-
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-    XLSX.utils.book_append_sheet(wb, ws, "RGB Data");
-    XLSX.writeFile(wb, "rgb_results.xlsx");
-}
 
 analyzeBtn.addEventListener('click', async function () {
     logRGBValues = [];
@@ -173,37 +158,47 @@ analyzeBtn.addEventListener('click', async function () {
         const color1 = getAverageColor(redBox1);
         const color2 = getAverageColor(redBox2);
 
-        logRGBValues.push({
-            time: intervalCount * 10,
-            color1: { r: color1.r.toFixed(3), g: color1.g.toFixed(3), b: color1.b.toFixed(3) },
-            color2: { r: color2.r.toFixed(3), g: color2.g.toFixed(3), b: color2.b.toFixed(3) }
-        });
+        
+
+const prev = logRGBValues[logRGBValues.length - 1];
+if (prev) {
+    const slope = {
+        b1: (parseFloat(prev.color1.b) - color1.b).toFixed(3),
+        b2: (parseFloat(prev.color2.b) - color2.b).toFixed(3)
+    };
+
+    logRGBValues.push({
+        time: intervalCount * 2,
+        color1: { r: color1.r.toFixed(3), g: color1.g.toFixed(3), b: color1.b.toFixed(3) },
+        color2: { r: color2.r.toFixed(3), g: color2.g.toFixed(3), b: color2.b.toFixed(3) },
+        slope
+    });
+}
+
+
 
         result.innerHTML = `
-            時間: ${intervalCount * 10} 秒<br>
+            時間: ${intervalCount * 2} 秒<br>
             空白組 RGB: (${color1.r.toFixed(3)}, ${color1.g.toFixed(3)}, ${color1.b.toFixed(3)})<br>
             樣品組 RGB: (${color2.r.toFixed(3)}, ${color2.g.toFixed(3)}, ${color2.b.toFixed(3)})<br>
         `;
 
         intervalCount++;
-        if (intervalCount >= 361) {
+        if (intervalCount >= 91) {
             clearInterval(interval);
-            result.innerHTML += `<h3>取樣結果 (每10秒):</h3>`;
-            downloadExcel(logRGBValues);
-            analyzeBtn.disabled = false;
+            result.innerHTML += `<h3>取樣結果 (每10秒):</h3>`;            analyzeBtn.disabled = false;
             stopBtn.disabled = true;
             toggleTorch(false);
         }
-    }, 10000);
+    }, 2000);
 });
 
 stopBtn.addEventListener('click', function () {
     clearInterval(interval);
-    result.innerHTML += `<h3>取樣已提前結束</h3>`;
-    downloadExcel(logRGBValues);
-    analyzeBtn.disabled = false;
+    result.innerHTML += `<h3>取樣已提前結束</h3>`;    analyzeBtn.disabled = false;
     stopBtn.disabled = true;
     toggleTorch(false);
+    showQuartiles();
 });
 
 function toggleTorch(on) {
@@ -227,3 +222,61 @@ makeDraggable(redBox2);
 document.getElementById('startBtn').addEventListener('click', async () => {
     await startCamera();
 });
+
+
+function calculateQuartiles(values) {
+    values.sort((a, b) => a - b);
+    const q1 = values[Math.floor((values.length - 1) * 0.25)];
+    const q2 = values[Math.floor((values.length - 1) * 0.5)];
+    return { q1: q1.toFixed(3), q2: q2.toFixed(3) };
+}
+
+
+
+function showQuartiles() {
+    const b1Values = logRGBValues.map(entry => parseFloat(entry.slope.b1));
+    const b2Values = logRGBValues.map(entry => parseFloat(entry.slope.b2));
+    const b1Stats = calculateQuartiles(b1Values);
+    const b2Stats = calculateQuartiles(b2Values);
+    const percentReduction = calculatePercentageReduction(b1Stats, b2Stats);
+
+    result.innerHTML += `
+        <br><strong>空白組藍色變化：</strong><br>
+        Q1: ${b1Stats.q1}<br>
+        Q2 (中位數): ${b1Stats.q2}<br>
+        <strong>樣品組藍色變化：</strong><br>
+        Q1: ${b2Stats.q1}<br>
+        Q2 (中位數): ${b2Stats.q2}<br>
+        <strong>抑制率：</strong><br>
+        1 - (樣品Q1 / 空白Q1) = ${percentReduction.q1Percent}<br>
+        1 - (樣品Q2 / 空白Q2) = ${percentReduction.q2Percent}<br>
+        <strong>平均抑制率：</strong> ${percentReduction.average}<br>
+    `;
+}
+
+
+
+function calculatePercentageReduction(b1Stats, b2Stats) {
+    function safePercent(qB1, qB2) {
+        const n1 = parseFloat(qB1);
+        const n2 = parseFloat(qB2);
+        if (n1 === 0) return null;
+        return (1 - (n2 / n1)) * 100;
+    }
+
+    const q1Raw = safePercent(b1Stats.q1, b2Stats.q1);
+    const q2Raw = safePercent(b1Stats.q2, b2Stats.q2);
+    const avg = (q1Raw != null && q2Raw != null) ? ((q1Raw + q2Raw) / 2).toFixed(2) + "%" : "N/A";
+
+    return {
+        q1Percent: q1Raw != null ? q1Raw.toFixed(2) + "%" : "N/A",
+        q2Percent: q2Raw != null ? q2Raw.toFixed(2) + "%" : "N/A",
+        average: avg
+    };
+}
+
+    return {
+        q1Percent: safePercent(b1Stats.q1, b2Stats.q1),
+        q2Percent: safePercent(b1Stats.q2, b2Stats.q2)
+    };
+}
