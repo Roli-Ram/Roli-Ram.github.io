@@ -31,9 +31,9 @@
 
     <!-- 按鈕放 container 外部 -->
     <div class="button-group">
-        <button id="analyzeBtn">分析</button>
+        <button id="backBtn">返回上一頁</button>
         <button id="showStepsBtn">查看步驟</button>
-        <button id="stopBtn">提前結束</button>
+        <button id="analyzeBtn">分析</button>
     </div>
     <p id="result"></p>
     <script src="script.js"></script>
@@ -68,7 +68,11 @@ document.getElementById('showStepsBtn').addEventListener('click', () => {
 
 </div>
 
-
+<script>
+document.getElementById('backBtn').addEventListener('click', () => {
+    window.history.back();
+});
+</script>
 <script>
 document.getElementById('showStepsBtn').addEventListener('click', () => {
     document.getElementById('stepsModal').style.display = 'block';
