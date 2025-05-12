@@ -268,15 +268,6 @@ function calculatePercentageReduction(b1Stats, b2Stats) {
     const q2Raw = safePercent(b1Stats.q2, b2Stats.q2);
     const avg = (q1Raw != null && q2Raw != null) ? ((q1Raw + q2Raw) / 2).toFixed(2) + "%" : "N/A";
 
-    return {
-        q1Percent: q1Raw != null ? q1Raw.toFixed(2) + "%" : "N/A",
-        q2Percent: q2Raw != null ? q2Raw.toFixed(2) + "%" : "N/A",
-        average: avg
-    };
-}
+    
 
-    return {
-        q1Percent: safePercent(b1Stats.q1, b2Stats.q1),
-        q2Percent: safePercent(b1Stats.q2, b2Stats.q2)
-    };
-}
+    
