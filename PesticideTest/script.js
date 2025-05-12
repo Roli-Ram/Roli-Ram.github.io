@@ -1,4 +1,3 @@
-// script.js 整合更新版
 const video = document.getElementById('camera');
 const analyzeBtn = document.getElementById('analyzeBtn');
 const stopBtn = document.getElementById('stopBtn');
@@ -10,7 +9,6 @@ let stream;
 let interval;
 let logRGBValues = [];
 
-// 儲存框位置
 let redBoxPositions = {
     redBox1: { left: 0, top: 0 },
     redBox2: { left: 0, top: 0 },
@@ -46,7 +44,6 @@ function makeDraggable(box) {
 
     function startDragging(e) {
         isDragging = true;
-
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
@@ -140,9 +137,8 @@ function getAverageColor(box) {
         count++;
     }
 
+    return { r: r / count, g: g / count, b: b / count };
 }
-
-
 
 analyzeBtn.addEventListener('click', async function () {
     logRGBValues = [];
@@ -157,24 +153,20 @@ analyzeBtn.addEventListener('click', async function () {
         const color1 = getAverageColor(redBox1);
         const color2 = getAverageColor(redBox2);
 
-        
+        const prev = logRGBValues[logRGBValues.length - 1];
+        if (prev) {
+            const slope = {
+                b1: (parseFloat(prev.color1.b) - color1.b).toFixed(3),
+                b2: (parseFloat(prev.color2.b) - color2.b).toFixed(3)
+            };
 
-const prev = logRGBValues[logRGBValues.length - 1];
-if (prev) {
-    const slope = {
-        b1: (parseFloat(prev.color1.b) - color1.b).toFixed(3),
-        b2: (parseFloat(prev.color2.b) - color2.b).toFixed(3)
-    };
-
-    logRGBValues.push({
-        time: intervalCount * 2,
-        color1: { r: color1.r.toFixed(3), g: color1.g.toFixed(3), b: color1.b.toFixed(3) },
-        color2: { r: color2.r.toFixed(3), g: color2.g.toFixed(3), b: color2.b.toFixed(3) },
-        slope
-    });
-}
-
-
+            logRGBValues.push({
+                time: intervalCount * 2,
+                color1: { r: color1.r.toFixed(3), g: color1.g.toFixed(3), b: color1.b.toFixed(3) },
+                color2: { r: color2.r.toFixed(3), g: color2.g.toFixed(3), b: color2.b.toFixed(3) },
+                slope
+            });
+        }
 
         result.innerHTML = `
             時間: ${intervalCount * 2} 秒<br>
@@ -185,16 +177,19 @@ if (prev) {
         intervalCount++;
         if (intervalCount >= 91) {
             clearInterval(interval);
-            result.innerHTML += `<h3>取樣結果 (每10秒):</h3>`;            analyzeBtn.disabled = false;
+            result.innerHTML += `<h3>取樣結果:</h3>`;
+            analyzeBtn.disabled = false;
             stopBtn.disabled = true;
             toggleTorch(false);
+            showQuartiles();
         }
     }, 2000);
 });
 
 stopBtn.addEventListener('click', function () {
     clearInterval(interval);
-    result.innerHTML += `<h3>取樣已提前結束</h3>`;    analyzeBtn.disabled = false;
+    result.innerHTML += `<h3>取樣已提前結束</h3>`;
+    analyzeBtn.disabled = false;
     stopBtn.disabled = true;
     toggleTorch(false);
     showQuartiles();
@@ -222,14 +217,12 @@ document.getElementById('startBtn').addEventListener('click', async () => {
     await startCamera();
 });
 
-
 function calculateQuartiles(values) {
     values.sort((a, b) => a - b);
     const q1 = values[Math.floor((values.length - 1) * 0.25)];
     const q2 = values[Math.floor((values.length - 1) * 0.5)];
+    return { q1: q1.toFixed(3), q2: q2.toFixed(3) };
 }
-
-
 
 function showQuartiles() {
     const b1Values = logRGBValues.map(entry => parseFloat(entry.slope.b1));
@@ -252,19 +245,21 @@ function showQuartiles() {
     `;
 }
 
-
-
 function calculatePercentageReduction(b1Stats, b2Stats) {
     function safePercent(qB1, qB2) {
         const n1 = parseFloat(qB1);
         const n2 = parseFloat(qB2);
         if (n1 === 0) return null;
+        return (1 - (n2 / n1)) * 100;
     }
 
     const q1Raw = safePercent(b1Stats.q1, b2Stats.q1);
     const q2Raw = safePercent(b1Stats.q2, b2Stats.q2);
     const avg = (q1Raw != null && q2Raw != null) ? ((q1Raw + q2Raw) / 2).toFixed(2) + "%" : "N/A";
 
-    
-
-    
+    return {
+        q1Percent: q1Raw != null ? q1Raw.toFixed(2) + "%" : "N/A",
+        q2Percent: q2Raw != null ? q2Raw.toFixed(2) + "%" : "N/A",
+        average: avg
+    };
+}
