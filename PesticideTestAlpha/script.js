@@ -215,8 +215,7 @@ analyzeBtn.addEventListener('click', async function () {
     stopBtn.disabled = false;
     analyzeBtn.disabled = true;
 
-    await toggleTorch(true);
-    if (!blueChart) initChart();
+        if (!blueChart) initChart();
 
     function record() {
         const color1 = getAverageColor(redBox1);
@@ -280,4 +279,23 @@ makeDraggable(redBox2);
 
 document.getElementById('startBtn').addEventListener('click', async () => {
     await startCamera();
+});
+
+
+const torchBtn = document.getElementById('torchBtn');
+torchBtn.addEventListener('click', function () {
+    try {
+        const track = stream.getVideoTracks()[0];
+        const capabilities = track.getCapabilities();
+        if (capabilities.torch) {
+            const currentState = torchBtn.dataset.state === "on";
+            track.applyConstraints({
+                advanced: [{ torch: !currentState }]
+            });
+            torchBtn.dataset.state = currentState ? "off" : "on";
+            torchBtn.textContent = currentState ? "開啟手電筒" : "關閉手電筒";
+        }
+    } catch (err) {
+        console.error("無法控制手電筒: ", err);
+    }
 });

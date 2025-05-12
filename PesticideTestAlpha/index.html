@@ -11,7 +11,7 @@
 </head>
 <body>
     <h1>農藥抑制率分析</h1>
-    <div id="version" class="version-display">版本號: v1.1.6</div>
+    <div id="version" class="version-display">版本號: v1.1.7</div>
     <div class="container">
         <button id="startBtn">啟動攝像頭</button>
         <video id="camera" autoplay playsinline webkit-playsinline></video>
@@ -21,6 +21,7 @@
 
         <button id="analyzeBtn">分析</button>
         <button id="stopBtn">提前結束</button>
+        <button id="torchBtn" data-state="off">開啟手電筒</button>
         <p id="result">RGB: (R, G, B)</p>
         <canvas id="blueChart" width="400" height="200"></canvas>
     </div>
