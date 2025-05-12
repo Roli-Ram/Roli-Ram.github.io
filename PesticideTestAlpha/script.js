@@ -1,3 +1,24 @@
+
+function getDeviceBrandModel() {
+    const ua = navigator.userAgent;
+
+    if (/android/i.test(ua)) {
+        const modelMatch = ua.match(/Android.*?;\s*(.+?)\s*Build/);
+        const model = modelMatch ? modelMatch[1].trim() : "Android";
+        const brandMatch = ua.match(/\((.*?)\)/);
+        const brand = brandMatch ? brandMatch[1].split(";")[0].trim() : "Android";
+
+        return `${brand}_${model}`.replace(/\s+/g, "_");
+    } else if (/iphone/i.test(ua)) {
+        return "Apple_iPhone";
+    } else if (/ipad/i.test(ua)) {
+        return "Apple_iPad";
+    } else {
+        return "Unknown_Device";
+    }
+}
+
+
 // script.js 整合更新版
 const video = document.getElementById('camera');
 const analyzeBtn = document.getElementById('analyzeBtn');
@@ -179,7 +200,11 @@ function downloadExcel(logRGBValues) {
 
     const ws = XLSX.utils.aoa_to_sheet(wsData);
     XLSX.utils.book_append_sheet(wb, ws, "RGB Data");
-    XLSX.writeFile(wb, "rgb_results.xlsx");
+        const deviceInfo = getDeviceBrandModel();
+    const date = new Date();
+    const dateStr = `${date.getFullYear()}${(date.getMonth()+1).toString().padStart(2, '0')}${date.getDate().toString().padStart(2, '0')}`;
+    const filename = `${deviceInfo}_${dateStr}.xlsx`;
+    XLSX.writeFile(wb, filename);
 }
 
 analyzeBtn.addEventListener('click', async function () {
