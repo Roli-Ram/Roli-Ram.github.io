@@ -36,12 +36,9 @@ html, body {
 }
 
 .TopImage {
-    background-image: url('images/TopImage.png');
-    background-size: cover;
-    background-position: center;
     width: 100vw;
-    height: 100px; 
-    position: relative;
+    height: 100px;
+    overflow: hidden;
 }
 
 .header {
