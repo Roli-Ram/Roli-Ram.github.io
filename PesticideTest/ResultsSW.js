@@ -1,4 +1,4 @@
-const percent = 42;  // 抑制率百分比計算
+const percent = parseFloat(new URLSearchParams(location.search).get('rate')) || 0;  // 抑制率百分比計算
 
 const circle = document.getElementById('fgCircle');
 const text = document.getElementById('percentText');
