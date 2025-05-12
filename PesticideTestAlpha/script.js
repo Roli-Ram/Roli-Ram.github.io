@@ -79,9 +79,7 @@ async function startCamera() {
         analyzeBtn.disabled = false;
         stopBtn.disabled = true;
     } catch (err) {
-        console.error("無法啟動攝像頭: ", err);
-        
-        updateChart(intervalCount * 2, color1.b, color2.b);
+
         result.innerHTML = `錯誤：無法啟動攝像頭。請檢查瀏覽器權限設置或設備支持性。${err.message}`;
         analyzeBtn.disabled = true;
     }
