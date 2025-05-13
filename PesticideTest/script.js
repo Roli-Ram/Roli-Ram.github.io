@@ -172,6 +172,8 @@ function calculateQuartiles(values) {
 }
 
 analyzeBtn.addEventListener('click', async function () {
+    updateRedBoxPositions();
+    
     logRGBValues = [];
     let intervalCount = 180;
 
@@ -275,6 +277,20 @@ function calculatePercentageReduction(b1Stats, b2Stats) {
         q2Percent: q2Raw != null ? q2Raw.toFixed(2) + "%" : "N/A",
         average: avg
     };
+}
+
+function updateRedBoxPositions() {
+    const parentRect = video.getBoundingClientRect();
+
+    ['redBox1', 'redBox2'].forEach(id => {
+        const box = document.getElementById(id);
+        const rect = box.getBoundingClientRect();
+
+        redBoxPositions[id] = {
+            left: rect.left - parentRect.left,
+            top: rect.top - parentRect.top
+        };
+    });
 }
 
 function showQuartiles() {
