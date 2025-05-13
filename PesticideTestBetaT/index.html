@@ -6,12 +6,12 @@
   <title>攝像頭顏色分析</title>
   <link rel="stylesheet" href="styles.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- ⭐️ 加回來 -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
   <div class="TopImage">
-    <img src="images/TopImage.png" alt="Top Image" style="width: 100%; height: 100px; object-fit: contain; display: block;" />
+    <img src="images/TopImage.png" alt="Top Image" style="width: 100%; height: 100px; object-fit: contain;" />
   </div>
 
   <div class="header">
@@ -22,52 +22,25 @@
   <div class="container">
     <video id="camera" autoplay playsinline muted></video>
 
-    <!-- 紅框部分 -->
-    <div id="redBox1" class="redBox">
+    <!-- 拖曳紅框 -->
+    <div id="redBox1" class="redBox" style="left: 100px; top: 150px;">
       <span class="boxLabel">空白組</span>
     </div>
-    <div id="redBox2" class="redBox">
+    <div id="redBox2" class="redBox" style="left: 100px; top: 250px;">
       <span class="boxLabel">樣品組</span>
     </div>
   </div>
 
-  <!-- 按鈕放 container 外部 -->
   <div class="button-group">
     <button id="backBtn">返回上一頁</button>
     <button id="showStepsBtn">查看步驟</button>
     <button id="analyzeBtn">分析</button>
     <button id="stopBtn" style="display: none;">停止分析</button>
+    <button id="torchBtn" data-state="off">開啟手電筒</button>
   </div>
 
   <p id="result"></p>
-
-  <!-- ⭐️ 折線圖 canvas 加這裡 -->
   <canvas id="blueChart" width="400" height="200" style="max-width: 100%; margin-top: 20px;"></canvas>
-
-  <script src="script.js"></script>
-
-  <script>
-    if (stopBtn) stopBtn.disabled = true;
-
-    document.getElementById('backBtn').addEventListener('click', () => {
-      window.history.back();
-    });
-
-    document.getElementById('showStepsBtn').addEventListener('click', () => {
-      document.getElementById('stepsModal').style.display = 'block';
-    });
-
-    document.getElementById('closeStepsBtn').addEventListener('click', () => {
-      document.getElementById('stepsModal').style.display = 'none';
-    });
-
-    window.addEventListener('click', (event) => {
-      const modal = document.getElementById('stepsModal');
-      if (event.target === modal) {
-        modal.style.display = 'none';
-      }
-    });
-  </script>
 
   <!-- 步驟 Modal -->
   <div id="stepsModal" class="modal">
@@ -93,5 +66,21 @@
   </div>
 
   <div id="version" class="version-display">版本號: v1.512.1812-sw</div>
+
+  <script src="script.js"></script>
+  <script>
+    if (stopBtn) stopBtn.disabled = true;
+    document.getElementById('backBtn').addEventListener('click', () => window.history.back());
+    document.getElementById('showStepsBtn').addEventListener('click', () => {
+      document.getElementById('stepsModal').style.display = 'block';
+    });
+    document.getElementById('closeStepsBtn').addEventListener('click', () => {
+      document.getElementById('stepsModal').style.display = 'none';
+    });
+    window.addEventListener('click', (e) => {
+      const modal = document.getElementById('stepsModal');
+      if (e.target === modal) modal.style.display = 'none';
+    });
+  </script>
 </body>
 </html>

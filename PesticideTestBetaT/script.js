@@ -79,18 +79,27 @@ function startCamera() {
         result.innerHTML = `錯誤：無法啟動攝像頭。${err.message}`;
         analyzeBtn.disabled = true;
     });
+    video.onloadedmetadata = () => {
+    video.play();
+    makeDraggable(redBox1);
+    makeDraggable(redBox2);
+  };
 }
 
 function makeDraggable(box) {
     let offsetX = 0, offsetY = 0, isDragging = false;
 
     function startDragging(e) {
-        isDragging = true;
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
         offsetX = clientX - box.getBoundingClientRect().left;
         offsetY = clientY - box.getBoundingClientRect().top;
+
+        isDragging = true;
         document.body.style.cursor = 'grabbing';
+
+        if (e.cancelable) e.preventDefault();
     }
 
     function moveDragging(e) {
@@ -100,14 +109,22 @@ function makeDraggable(box) {
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
         const containerRect = document.querySelector('.container').getBoundingClientRect();
+
         const left = clientX - containerRect.left - offsetX;
         const top = clientY - containerRect.top - offsetY;
 
-        box.style.left = `${left}px`;
-        box.style.top = `${top}px`;
+        const maxLeft = containerRect.width - box.offsetWidth;
+        const maxTop = containerRect.height - box.offsetHeight;
 
-        // 更新位置
-        redBoxPositions[box.id] = { left, top };
+        const finalLeft = Math.max(0, Math.min(left, maxLeft));
+        const finalTop = Math.max(0, Math.min(top, maxTop));
+
+        box.style.left = `${finalLeft}px`;
+        box.style.top = `${finalTop}px`;
+
+        redBoxPositions[box.id] = { left: finalLeft, top: finalTop };
+
+        if (e.cancelable) e.preventDefault();
     }
 
     function stopDragging() {
@@ -115,13 +132,10 @@ function makeDraggable(box) {
         document.body.style.cursor = 'default';
     }
 
-    // 框的拖動事件監聽
     box.addEventListener('mousedown', startDragging);
-    box.addEventListener('touchstart', startDragging);
-
+    box.addEventListener('touchstart', startDragging, { passive: false });
     document.addEventListener('mousemove', moveDragging);
     document.addEventListener('touchmove', moveDragging, { passive: false });
-
     document.addEventListener('mouseup', stopDragging);
     document.addEventListener('touchend', stopDragging);
 }

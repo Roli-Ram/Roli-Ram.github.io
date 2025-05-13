@@ -99,6 +99,12 @@ html, body {
     cursor: move;
     z-index: 10;
     background-color: rgba(255, 0, 0, 0.2);
+    cursor: grab;
+    user-select: none;
+}
+
+.redBox:active {
+  cursor: grabbing;
 }
 
 #redBox1, #redBox2 {
@@ -107,23 +113,7 @@ html, body {
     position: absolute;
 }
 
-#redBox1 {
-    top: 150px;
-    left: 100px;
-}
-
-#redBox2 {
-    top: 50px;
-    left: 100px;
-}
-
 /* 手機微調紅框位置 */
-@media screen and (max-width: 768px) {
-    #redBox1 {
-        top: 50%;
-        transform: translate(-50%, -45%);
-    }
-}
 
 .redBox.fixed {
     pointer-events: none;
@@ -142,6 +132,7 @@ html, body {
     padding: 2px 5px;
     border-radius: 3px;
     text-align: center;
+    pointer-events: none;
 }
 
 /* 分析結果顯示 */
