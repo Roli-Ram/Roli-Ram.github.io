@@ -144,6 +144,33 @@ function getAverageColor(box) {
     return { r: r / count, g: g / count, b: b / count };
 }
 
+function removeOutliers(values, count = 3) {
+    const sorted = [...values].sort((a, b) => a - b);
+    return sorted.slice(count, sorted.length - count);
+}
+
+function calculateQuartiles(values) {
+    values = values.filter(v => typeof v === 'number' && !isNaN(v));
+    if (values.length === 0) return { q1: "N/A", q2: "N/A" };
+
+    const trimmed = removeOutliers(values, 3);
+    if (trimmed.length === 0) return { q1: "N/A", q2: "N/A" };
+
+    const median = arr => {
+        const mid = Math.floor(arr.length / 2);
+        return arr.length % 2 === 0 ? (arr[mid - 1] + arr[mid]) / 2 : arr[mid];
+    };
+
+    const q2Raw = median(trimmed);
+    const lowerHalf = trimmed.slice(0, Math.floor(trimmed.length / 2));
+    const q1Raw = median(lowerHalf);
+
+    return {
+        q1: q1Raw.toFixed(5),
+        q2: q2Raw.toFixed(5)
+    };
+}
+
 analyzeBtn.addEventListener('click', async function () {
     logRGBValues = [];
     let intervalCount = 180;
@@ -230,33 +257,6 @@ makeDraggable(redBox2);
 document.getElementById('startBtn').addEventListener('click', async () => {
     await startCamera();
 });
-
-function calculateQuartiles(values) {
-    if (!Array.isArray(values) || values.length === 0) {
-        return { q1: "N/A", q2: "N/A" };
-    }
-
-    values = values.filter(v => typeof v === 'number' && !isNaN(v));
-    values.sort((a, b) => a - b);
-
-    const median = (arr) => {
-        const mid = Math.floor(arr.length / 2);
-        if (arr.length % 2 === 0) {
-            return (arr[mid - 1] + arr[mid]) / 2;
-        } else {
-            return arr[mid];
-        }
-    };
-
-    const q2Raw = median(values);
-    const lowerHalf = values.slice(0, Math.floor(values.length / 2));
-    const q1Raw = median(lowerHalf);
-
-    return {
-        q1: q1Raw.toFixed(5),
-        q2: q2Raw.toFixed(5)
-    };
-}
 
 function calculatePercentageReduction(b1Stats, b2Stats) {
     function safePercent(qB1, qB2) {
