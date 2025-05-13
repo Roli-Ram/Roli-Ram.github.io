@@ -20,6 +20,12 @@
     <div class="container">
         <video id="camera" autoplay playsinline muted></video>
 
+        <!-- 分析中提示條 -->
+        <div id="analyzingOverlay" class="inline-hint" style="display: none;">
+            <div class="spinner-inline"></div>
+            <span style="margin-left: 10px;">正在分析中…</span>
+        </div>
+
         <!-- 紅框部分 -->
         <div id="redBox1" class="redBox">
             <span class="boxLabel">空白組</span>
@@ -33,7 +39,7 @@
     <div class="button-group">
         <button id="backBtn">返回上一頁</button>
         <button id="showStepsBtn">查看步驟</button>
-        <button id="analyzeBtn">分析</button>
+        <button id="analyzeBtn">開始分析</button>
         <button id="stopBtn" style="display:none;">停止分析</button>
     </div>
     <p id="result"></p>
@@ -93,7 +99,7 @@ window.addEventListener('click', (event) => {
 });
 </script>
 
-<div id="version" class="version-display">版本號: v1.512.1812-sw</div>
+<div id="version" class="version-display">版本號: v1.513.1135-sw</div>
 
 </body>
 </html>
