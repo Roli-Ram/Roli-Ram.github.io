@@ -233,13 +233,25 @@ function calculateQuartiles(values) {
         return { q1: "N/A", q2: "N/A" };
     }
 
+    values = values.filter(v => typeof v === 'number' && !isNaN(v));
     values.sort((a, b) => a - b);
-    const q1 = values[Math.floor((values.length - 1) * 0.25)];
-    const q2 = values[Math.floor((values.length - 1) * 0.5)];
+
+    const median = (arr) => {
+        const mid = Math.floor(arr.length / 2);
+        if (arr.length % 2 === 0) {
+            return (arr[mid - 1] + arr[mid]) / 2;
+        } else {
+            return arr[mid];
+        }
+    };
+
+    const q2Raw = median(values);
+    const lowerHalf = values.slice(0, Math.floor(values.length / 2));
+    const q1Raw = median(lowerHalf);
 
     return {
-        q1: q1 !== undefined ? q1.toFixed(3) : "N/A",
-        q2: q2 !== undefined ? q2.toFixed(3) : "N/A"
+        q1: q1Raw.toFixed(5),
+        q2: q2Raw.toFixed(5)
     };
 }
 
