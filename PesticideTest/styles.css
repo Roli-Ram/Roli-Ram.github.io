@@ -117,14 +117,6 @@ html, body {
     left: 100px;
 }
 
-/* 手機微調紅框位置 */
-@media screen and (max-width: 768px) {
-    #redBox1 {
-        top: 50%;
-        transform: translate(-50%, -45%);
-    }
-}
-
 .redBox.fixed {
     pointer-events: none;
 }
