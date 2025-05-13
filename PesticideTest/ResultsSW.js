@@ -16,17 +16,18 @@ if (rateRaw === null) {
     document.getElementById("fgCircle").style.stroke = "#ccc";
     document.getElementById("statusText").textContent = "未接收到資料";
     document.getElementById("statusText").style.color = "#999";
-} else {
+} 
+else if ( rateRaw < 0 || rateRaw > 100) {
+    document.getElementById("percentText").textContent = "檢測率異常";
+    document.getElementById("fgCircle").style.stroke = "#ccc";
+    document.getElementById("statusText").textContent = "請檢查數據";
+    document.getElementById("statusText").style.color = "#999";
+    }
+else 
+{
     const percent = parseFloat(rateRaw);
     localStorage.removeItem("rate");
-    //  或數值異常
-    if (isNaN(percent) || percent < 0 || percent > 100) {
-        text.textContent = "數值異常";
-        circle.style.stroke = "#ccc";
-        status.textContent = "請確認實驗數據";
-        status.style.color = "#999";
-        return;  
-    }
+
     // 判斷等級與顏色
     let color = '';
     let label = '';
