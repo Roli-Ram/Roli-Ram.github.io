@@ -4,6 +4,7 @@ const stopBtn = document.getElementById('stopBtn');
 const result = document.getElementById('result');
 const redBox1 = document.getElementById('redBox1');
 const redBox2 = document.getElementById('redBox2');
+const analyzingOverlay = document.getElementById('analyzingOverlay');
 
 let stream;
 let interval;
@@ -142,51 +143,64 @@ function getAverageColor(box) {
 
 analyzeBtn.addEventListener('click', async function () {
     logRGBValues = [];
-    let intervalCount = 0;
+    let intervalCount = 180;
 
     stopBtn.disabled = false;
     analyzeBtn.disabled = true;
 
+    analyzingOverlay.style.display = 'flex'; //  顯示提示條
     await toggleTorch(true);
+
+    // 立刻顯示
+    const color1 = getAverageColor(redBox1);
+    const color2 = getAverageColor(redBox2);
+
+    logRGBValues.push({
+        time: intervalCount,
+        color1: { r: color1.r.toFixed(3), g: color1.g.toFixed(3), b: color1.b.toFixed(3) },
+        color2: { r: color2.r.toFixed(3), g: color2.g.toFixed(3), b: color2.b.toFixed(3) },
+        slope: null
+    });
+
+    result.innerHTML = `
+        時間剩餘: ${intervalCount} 秒<br>
+        空白組 RGB: (${color1.r.toFixed(3)}, ${color1.g.toFixed(3)}, ${color1.b.toFixed(3)})<br>
+        樣品組 RGB: (${color2.r.toFixed(3)}, ${color2.g.toFixed(3)}, ${color2.b.toFixed(3)})<br>
+    `;
+
+    intervalCount -= 1;
 
     interval = setInterval(() => {
         const color1 = getAverageColor(redBox1);
         const color2 = getAverageColor(redBox2);
 
         const prev = logRGBValues[logRGBValues.length - 1];
-        if (prev) {
-            const slope = {
-                b1: (parseFloat(prev.color1.b) - color1.b).toFixed(3),
-                b2: (parseFloat(prev.color2.b) - color2.b).toFixed(3)
-            };
+        const slope = {
+            b1: (parseFloat(prev.color1.b) - color1.b).toFixed(3),
+            b2: (parseFloat(prev.color2.b) - color2.b).toFixed(3)
+        };
 
-            logRGBValues.push({
-                time: intervalCount * 2,
-                color1: { r: color1.r.toFixed(3), g: color1.g.toFixed(3), b: color1.b.toFixed(3) },
-                color2: { r: color2.r.toFixed(3), g: color2.g.toFixed(3), b: color2.b.toFixed(3) },
-                slope
-            });
-        } else {
-            logRGBValues.push({
-                time: intervalCount * 2,
-                color1: { r: color1.r.toFixed(3), g: color1.g.toFixed(3), b: color1.b.toFixed(3) },
-                color2: { r: color2.r.toFixed(3), g: color2.g.toFixed(3), b: color2.b.toFixed(3) },
-                slope: null
-            });
-        }
+        logRGBValues.push({
+            time: intervalCount,
+            color1: { r: color1.r.toFixed(3), g: color1.g.toFixed(3), b: color1.b.toFixed(3) },
+            color2: { r: color2.r.toFixed(3), g: color2.g.toFixed(3), b: color2.b.toFixed(3) },
+            slope
+        });
 
         result.innerHTML = `
-            時間: ${intervalCount * 2} 秒<br>
+            剩餘時間: ${intervalCount} 秒<br>
             空白組 RGB: (${color1.r.toFixed(3)}, ${color1.g.toFixed(3)}, ${color1.b.toFixed(3)})<br>
             樣品組 RGB: (${color2.r.toFixed(3)}, ${color2.g.toFixed(3)}, ${color2.b.toFixed(3)})<br>
         `;
 
-        intervalCount++;
-        if (intervalCount >= 91) {
+        intervalCount -= 1;
+
+        if (intervalCount < 0) {
             clearInterval(interval);
             analyzeBtn.disabled = false;
             stopBtn.disabled = true;
             toggleTorch(false);
+            analyzingOverlay.style.display = 'none'; // 分析結束隱藏
             showQuartiles();
         }
     }, 2000);
