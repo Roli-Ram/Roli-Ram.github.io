@@ -275,13 +275,26 @@ function calculatePercentageReduction(b1Stats, b2Stats) {
 }
 
 function showQuartiles() {
-    const validData = logRGBValues.filter(entry => entry.slope && entry.slope.b1 !== undefined && entry.slope.b2 !== undefined);
-    const b1Values = validData.map(entry => parseFloat(entry.slope.b1));
-    const b2Values = validData.map(entry => parseFloat(entry.slope.b2));
+    // 過濾有效資料
+    const validData = logRGBValues.filter(entry =>
+        entry.slope &&
+        !isNaN(parseFloat(entry.slope.b1)) &&
+        !isNaN(parseFloat(entry.slope.b2))
+    );
+
+    // 取變化幅度（無論上升或下降）
+    const b1Values = validData.map(entry => Math.abs(parseFloat(entry.slope.b1)));
+    const b2Values = validData.map(entry => Math.abs(parseFloat(entry.slope.b2)));
+
+    // 四分位數統計
     const b1Stats = calculateQuartiles(b1Values);
     const b2Stats = calculateQuartiles(b2Values);
+
+    // 計算抑制率
     const percentReduction = calculatePercentageReduction(b1Stats, b2Stats);
     const percentResult = percentReduction.average;
+
+    // 儲存並跳轉
     localStorage.setItem("rate", percentResult);
     location.href = "Results.html";
 }
