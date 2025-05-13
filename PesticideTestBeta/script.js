@@ -1,4 +1,3 @@
-// DOM 元件初始化
 const video = document.getElementById('camera');
 const analyzeBtn = document.getElementById('analyzeBtn');
 const stopBtn = document.getElementById('stopBtn');
@@ -34,7 +33,7 @@ async function startCamera() {
         analyzeBtn.disabled = false;
         stopBtn.disabled = true;
     } catch (err) {
-        console.error("無法啟動攝像頭: ", err);
+
         result.innerHTML = `錯誤：無法啟動攝像頭。請檢查瀏覽器權限設置或設備支持性。${err.message}`;
         analyzeBtn.disabled = true;
     }
@@ -47,15 +46,8 @@ function makeDraggable(box) {
         isDragging = true;
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-        const parentRect = box.offsetParent.getBoundingClientRect();
-        const boxRect = box.getBoundingClientRect();
-
-        offsetX = clientX - boxRect.left;
-        offsetY = clientY - boxRect.top;
-
-        e.preventDefault();
-        e.stopPropagation();
+        offsetX = clientX - box.getBoundingClientRect().left;
+        offsetY = clientY - box.getBoundingClientRect().top;
         document.body.style.cursor = 'grabbing';
     }
 
@@ -65,32 +57,15 @@ function makeDraggable(box) {
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
-        const parent = box.offsetParent;
-        const camera = document.getElementById('camera');
-        const parentRect = parent.getBoundingClientRect();
-        const cameraRect = camera.getBoundingClientRect();
+        const containerRect = document.querySelector('.container').getBoundingClientRect();
+        const left = clientX - containerRect.left - offsetX;
+        const top = clientY - containerRect.top - offsetY;
 
-        const cameraOffsetLeft = cameraRect.left - parentRect.left;
-        const cameraOffsetTop = cameraRect.top - parentRect.top;
+        box.style.left = `${left}px`;
+        box.style.top = `${top}px`;
 
-        const boxWidth = box.offsetWidth;
-        const boxHeight = box.offsetHeight;
-
-        const rawLeft = clientX - parentRect.left - offsetX;
-        const rawTop = clientY - parentRect.top - offsetY;
-
-        const minLeft = cameraOffsetLeft;
-        const maxLeft = cameraOffsetLeft + camera.offsetWidth - boxWidth;
-        const minTop = cameraOffsetTop;
-        const maxTop = cameraOffsetTop + camera.offsetHeight - boxHeight;
-
-        const newLeft = Math.max(minLeft, Math.min(rawLeft, maxLeft));
-        const newTop = Math.max(minTop, Math.min(rawTop, maxTop));
-
-        box.style.left = `${newLeft}px`;
-        box.style.top = `${newTop}px`;
-
-        redBoxPositions[box.id] = { left: newLeft, top: newTop };
+        // 更新位置
+        redBoxPositions[box.id] = { left, top };
     }
 
     function stopDragging() {
@@ -98,10 +73,13 @@ function makeDraggable(box) {
         document.body.style.cursor = 'default';
     }
 
+    // 框的拖動事件監聽
     box.addEventListener('mousedown', startDragging);
     box.addEventListener('touchstart', startDragging);
+
     document.addEventListener('mousemove', moveDragging);
     document.addEventListener('touchmove', moveDragging, { passive: false });
+
     document.addEventListener('mouseup', stopDragging);
     document.addEventListener('touchend', stopDragging);
 }
@@ -142,40 +120,27 @@ function getAverageColor(box) {
 }
 
 analyzeBtn.addEventListener('click', async function () {
+    if (!blueChart) initChart();
     logRGBValues = [];
     let intervalCount = 0;
 
     stopBtn.disabled = false;
     analyzeBtn.disabled = true;
 
-    await toggleTorch(true);
+        if (!blueChart) initChart();
 
-    interval = setInterval(() => {
+    function record() {
         const color1 = getAverageColor(redBox1);
         const color2 = getAverageColor(redBox2);
 
-        const prev = logRGBValues[logRGBValues.length - 1];
-        if (prev) {
-            const slope = {
-                b1: (parseFloat(prev.color1.b) - color1.b).toFixed(3),
-                b2: (parseFloat(prev.color2.b) - color2.b).toFixed(3)
-            };
+        logRGBValues.push({
+            time: intervalCount * 2,
+            color1: { r: color1.r.toFixed(3), g: color1.g.toFixed(3), b: color1.b.toFixed(3) },
+            color2: { r: color2.r.toFixed(3), g: color2.g.toFixed(3), b: color2.b.toFixed(3) }
+        });
 
-            logRGBValues.push({
-                time: intervalCount * 2,
-                color1: { r: color1.r.toFixed(3), g: color1.g.toFixed(3), b: color1.b.toFixed(3) },
-                color2: { r: color2.r.toFixed(3), g: color2.g.toFixed(3), b: color2.b.toFixed(3) },
-                slope
-            });
-        } else {
-            logRGBValues.push({
-                time: intervalCount * 2,
-                color1: { r: color1.r.toFixed(3), g: color1.g.toFixed(3), b: color1.b.toFixed(3) },
-                color2: { r: color2.r.toFixed(3), g: color2.g.toFixed(3), b: color2.b.toFixed(3) },
-                slope: null
-            });
-        }
-
+        
+        updateChart(intervalCount * 2, color1.b, color2.b);
         result.innerHTML = `
             時間: ${intervalCount * 2} 秒<br>
             空白組 RGB: (${color1.r.toFixed(3)}, ${color1.g.toFixed(3)}, ${color1.b.toFixed(3)})<br>
@@ -183,14 +148,18 @@ analyzeBtn.addEventListener('click', async function () {
         `;
 
         intervalCount++;
-        if (intervalCount >= 91) {
+        if (intervalCount > 90) {
             clearInterval(interval);
+            result.innerHTML += `<h3>取樣結果 (每2秒):</h3>`;
+            downloadExcel(logRGBValues);
             analyzeBtn.disabled = false;
             stopBtn.disabled = true;
             toggleTorch(false);
-            showQuartiles();
         }
-    }, 2000);
+    }
+
+    record(); // 立即記錄 0 秒
+    interval = setInterval(record, 2000);
 });
 
 function toggleTorch(on) {
@@ -198,37 +167,35 @@ function toggleTorch(on) {
         const track = stream.getVideoTracks()[0];
         const capabilities = track.getCapabilities();
         if (capabilities.torch) {
-            track.applyConstraints({ advanced: [{ torch: on }] });
+            track.applyConstraints({
+                advanced: [{ torch: on }]
+            });
         }
     } catch (err) {
         console.error("無法控制手電筒: ", err);
     }
 }
 
+startCamera();
+makeDraggable(redBox1);
+makeDraggable(redBox2);
+
+document.getElementById('startBtn').addEventListener('click', async () => {
+    await startCamera();
+});
+
 function calculateQuartiles(values) {
     if (!Array.isArray(values) || values.length === 0) {
         return { q1: "N/A", q2: "N/A" };
     }
 
-    values = values.filter(v => typeof v === 'number' && !isNaN(v));
     values.sort((a, b) => a - b);
-
-    const median = (arr) => {
-        const mid = Math.floor(arr.length / 2);
-        if (arr.length % 2 === 0) {
-            return (arr[mid - 1] + arr[mid]) / 2;
-        } else {
-            return arr[mid];
-        }
-    };
-
-    const q2Raw = median(values);
-    const lowerHalf = values.slice(0, Math.floor(values.length / 2));
-    const q1Raw = median(lowerHalf);
+    const q1 = values[Math.floor((values.length - 1) * 0.25)];
+    const q2 = values[Math.floor((values.length - 1) * 0.5)];
 
     return {
-        q1: q1Raw.toFixed(5),
-        q2: q2Raw.toFixed(5)
+        q1: q1 !== undefined ? q1.toFixed(3) : "N/A",
+        q2: q2 !== undefined ? q2.toFixed(3) : "N/A"
     };
 }
 
@@ -239,57 +206,16 @@ function calculatePercentageReduction(b1Stats, b2Stats) {
         if (n1 === 0) return null;
         return (1 - (n2 / n1)) * 100;
     }
+
     const q1Raw = safePercent(b1Stats.q1, b2Stats.q1);
     const q2Raw = safePercent(b1Stats.q2, b2Stats.q2);
     const avg = (q1Raw != null && q2Raw != null) ? ((q1Raw + q2Raw) / 2).toFixed(2) + "%" : "N/A";
+
     return {
         q1Percent: q1Raw != null ? q1Raw.toFixed(2) + "%" : "N/A",
         q2Percent: q2Raw != null ? q2Raw.toFixed(2) + "%" : "N/A",
         average: avg
     };
-}
-
-function exportToExcel() {
-    const exportData = logRGBValues.map(entry => ({
-        Time: entry.time + " 秒",
-        空白組_R: entry.color1.r,
-        空白組_G: entry.color1.g,
-        空白組_B: entry.color1.b,
-        樣品組_R: entry.color2.r,
-        樣品組_G: entry.color2.g,
-        樣品組_B: entry.color2.b,
-        Slope_B1: entry.slope ? entry.slope.b1 : "",
-        Slope_B2: entry.slope ? entry.slope.b2 : ""
-    }));
-
-    const validData = logRGBValues.filter(entry => entry.slope && !isNaN(entry.slope.b1) && !isNaN(entry.slope.b2));
-    const b1Values = validData.map(entry => parseFloat(entry.slope.b1));
-    const b2Values = validData.map(entry => parseFloat(entry.slope.b2));
-    const b1Stats = calculateQuartiles(b1Values);
-    const b2Stats = calculateQuartiles(b2Values);
-    const percentReduction = calculatePercentageReduction(b1Stats, b2Stats);
-
-    exportData.push({
-        Time: "統計",
-        空白組_R: "",
-        空白組_G: "",
-        空白組_B: "",
-        樣品組_R: "",
-        樣品組_G: "",
-        樣品組_B: "",
-        Slope_B1: "",
-        Slope_B2: "",
-        Q1_B1: b1Stats.q1,
-        Q2_B1: b1Stats.q2,
-        Q1_B2: b2Stats.q1,
-        Q2_B2: b2Stats.q2,
-        平均減少百分比: percentReduction.average
-    });
-
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "分析結果");
-    XLSX.writeFile(workbook, "RGB分析結果.xlsx");
 }
 
 function showQuartiles() {
@@ -301,15 +227,5 @@ function showQuartiles() {
     const percentReduction = calculatePercentageReduction(b1Stats, b2Stats);
     const percentResult = percentReduction.average;
     localStorage.setItem("rate", percentResult);
-
-    exportToExcel(); // 自動匯出 Excel
     location.href = "Results.html";
 }
-
-startCamera();
-makeDraggable(redBox1);
-makeDraggable(redBox2);
-
-document.getElementById('startBtn').addEventListener('click', async () => {
-    await startCamera();
-});
