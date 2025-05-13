@@ -88,16 +88,12 @@ function makeDraggable(box) {
         isDragging = true;
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-        const boxRect = box.getBoundingClientRect();
-        offsetX = clientX - boxRect.left;
-        offsetY = clientY - boxRect.top;
-
-        e.preventDefault();
+        offsetX = clientX - box.getBoundingClientRect().left;
+        offsetY = clientY - box.getBoundingClientRect().top;
         document.body.style.cursor = 'grabbing';
     }
 
-    function dragMove(e) {
+    function moveDragging(e) {
         if (!isDragging) return;
 
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -110,9 +106,8 @@ function makeDraggable(box) {
         box.style.left = `${left}px`;
         box.style.top = `${top}px`;
 
+        // 更新位置
         redBoxPositions[box.id] = { left, top };
-
-        if (e.cancelable) e.preventDefault(); // 防止畫面滑動
     }
 
     function stopDragging() {
@@ -120,14 +115,14 @@ function makeDraggable(box) {
         document.body.style.cursor = 'default';
     }
 
-    // Mouse
+    // 框的拖動事件監聽
     box.addEventListener('mousedown', startDragging);
-    document.addEventListener('mousemove', dragMove);
-    document.addEventListener('mouseup', stopDragging);
+    box.addEventListener('touchstart', startDragging);
 
-    // Touch
-    box.addEventListener('touchstart', startDragging, { passive: false });
-    document.addEventListener('touchmove', dragMove, { passive: false });
+    document.addEventListener('mousemove', moveDragging);
+    document.addEventListener('touchmove', moveDragging, { passive: false });
+
+    document.addEventListener('mouseup', stopDragging);
     document.addEventListener('touchend', stopDragging);
 }
 
