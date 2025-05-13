@@ -82,7 +82,14 @@ document.getElementById('showStepsBtn').addEventListener('click', () => {
 if (stopBtn) stopBtn.disabled = true;
     
 document.getElementById('backBtn').addEventListener('click', () => {
-    window.history.back();
+    if (document.referrer && document.referrer !== location.href) 
+    {
+        window.history.back();
+    } 
+    else
+    {
+        window.location.href = 'intro.html'; 
+    }
 });
 
 document.getElementById('showStepsBtn').addEventListener('click', () => {
@@ -99,7 +106,7 @@ window.addEventListener('click', (event) => {
 });
 </script>
 
-<div id="version" class="version-display">版本號: v1.513.1237-sw</div>
+<div id="version" class="version-display">版本號: v1.513.1317-sw</div>
 
 </body>
 </html>
