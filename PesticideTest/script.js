@@ -263,3 +263,6 @@ function calculatePercentageReduction(b1Stats, b2Stats) {
         average: avg
     };
 }
+    const percentResult =avg
+    localStorage.setItem("rate", percentResult);  
+    location.href = "Results.html";
