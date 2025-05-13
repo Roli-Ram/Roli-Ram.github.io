@@ -255,6 +255,7 @@ function exportToExcel() {
     const b2Stats = calculateQuartiles(b2Values);
     const percentReduction = calculatePercentageReduction(b1Stats, b2Stats);
 
+    // 🧮 ➕ 統計列獨立欄位輸出
     exportData.push({
         Time: "統計",
         空白組_R: "",
@@ -263,8 +264,13 @@ function exportToExcel() {
         樣品組_R: "",
         樣品組_G: "",
         樣品組_B: "",
-        Slope_B1: `Q1=${b1Stats.q1}, Q2=${b1Stats.q2}`,
-        Slope_B2: `Q1=${b2Stats.q1}, Q2=${b2Stats.q2}, 平均減少=${percentReduction.average}`
+        Slope_B1: "",
+        Slope_B2: "",
+        Q1_B1: b1Stats.q1,
+        Q2_B1: b1Stats.q2,
+        Q1_B2: b2Stats.q1,
+        Q2_B2: b2Stats.q2,
+        平均減少百分比: percentReduction.average
     });
 
     const worksheet = XLSX.utils.json_to_sheet(exportData);
