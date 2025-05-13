@@ -1,3 +1,25 @@
+
+function getDeviceBrandModel() {
+    const ua = navigator.userAgent;
+
+    if (/android/i.test(ua)) {
+        const modelMatch = ua.match(/Android.*?;\s*(.+?)\s*Build/);
+        const model = modelMatch ? modelMatch[1].trim() : "Android";
+        const brandMatch = ua.match(/\((.*?)\)/);
+        const brand = brandMatch ? brandMatch[1].split(";")[0].trim() : "Android";
+
+        return `${brand}_${model}`.replace(/\s+/g, "_");
+    } else if (/iphone/i.test(ua)) {
+        return "Apple_iPhone";
+    } else if (/ipad/i.test(ua)) {
+        return "Apple_iPad";
+    } else {
+        return "Unknown_Device";
+    }
+}
+
+
+// script.js 整合更新版
 const video = document.getElementById('camera');
 const analyzeBtn = document.getElementById('analyzeBtn');
 const stopBtn = document.getElementById('stopBtn');
@@ -9,6 +31,51 @@ let stream;
 let interval;
 let logRGBValues = [];
 
+let blueChart;
+
+function initChart() {
+    const ctx = document.getElementById('blueChart').getContext('2d');
+    blueChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [
+                {
+                    label: '空白組 B',
+                    data: [],
+                    borderColor: 'blue',
+                    borderWidth: 2,
+                    fill: false
+                },
+                {
+                    label: '樣品組 B',
+                    data: [],
+                    borderColor: 'purple',
+                    borderWidth: 2,
+                    fill: false
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            animation: false,
+            scales: {
+                x: { title: { display: true, text: '時間 (秒)' } },
+                y: { title: { display: true, text: 'B 通道值' }, min: 0, max: 255 }
+            }
+        }
+    });
+}
+
+function updateChart(time, b1, b2) {
+    blueChart.data.labels.push(time);
+    blueChart.data.datasets[0].data.push(b1);
+    blueChart.data.datasets[1].data.push(b2);
+    blueChart.update();
+}
+
+
+// 儲存框位置
 let redBoxPositions = {
     redBox1: { left: 0, top: 0 },
     redBox2: { left: 0, top: 0 },
@@ -119,6 +186,27 @@ function getAverageColor(box) {
     return { r: r / count, g: g / count, b: b / count };
 }
 
+function downloadExcel(logRGBValues) {
+    const wb = XLSX.utils.book_new();
+    const wsData = [["Time (s)", "Blank R", "Blank G", "Blank B", "Sample R", "Sample G", "Sample B"]];
+
+    logRGBValues.forEach(entry => {
+        wsData.push([
+            entry.time,
+            entry.color1.r, entry.color1.g, entry.color1.b,
+            entry.color2.r, entry.color2.g, entry.color2.b
+        ]);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    XLSX.utils.book_append_sheet(wb, ws, "RGB Data");
+        const deviceInfo = getDeviceBrandModel();
+    const date = new Date();
+    const dateStr = `${date.getFullYear()}${(date.getMonth()+1).toString().padStart(2, '0')}${date.getDate().toString().padStart(2, '0')}`;
+    const filename = `${deviceInfo}_${dateStr}.xlsx`;
+    XLSX.writeFile(wb, filename);
+}
+
 analyzeBtn.addEventListener('click', async function () {
     if (!blueChart) initChart();
     logRGBValues = [];
@@ -160,6 +248,15 @@ analyzeBtn.addEventListener('click', async function () {
 
     record(); // 立即記錄 0 秒
     interval = setInterval(record, 2000);
+});
+
+stopBtn.addEventListener('click', function () {
+    clearInterval(interval);
+    result.innerHTML += `<h3>取樣已提前結束</h3>`;
+    downloadExcel(logRGBValues);
+    analyzeBtn.disabled = false;
+    stopBtn.disabled = true;
+    toggleTorch(false);
 });
 
 function toggleTorch(on) {
@@ -229,3 +326,21 @@ function showQuartiles() {
     localStorage.setItem("rate", percentResult);
     location.href = "Results.html";
 }
+
+const torchBtn = document.getElementById('torchBtn');
+torchBtn.addEventListener('click', function () {
+    try {
+        const track = stream.getVideoTracks()[0];
+        const capabilities = track.getCapabilities();
+        if (capabilities.torch) {
+            const currentState = torchBtn.dataset.state === "on";
+            track.applyConstraints({
+                advanced: [{ torch: !currentState }]
+            });
+            torchBtn.dataset.state = currentState ? "off" : "on";
+            torchBtn.textContent = currentState ? "開啟手電筒" : "關閉手電筒";
+        }
+    } catch (err) {
+        console.error("無法控制手電筒: ", err);
+    }
+});
