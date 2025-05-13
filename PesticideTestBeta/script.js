@@ -1,3 +1,4 @@
+// ⛓️ 初始化 DOM 元件
 const video = document.getElementById('camera');
 const analyzeBtn = document.getElementById('analyzeBtn');
 const stopBtn = document.getElementById('stopBtn');
@@ -206,13 +207,24 @@ function toggleTorch(on) {
     }
 }
 
-startCamera();
-makeDraggable(redBox1);
-makeDraggable(redBox2);
+function exportToExcel() {
+    const exportData = logRGBValues.map(entry => ({
+        Time: entry.time + " 秒",
+        空白組_R: entry.color1.r,
+        空白組_G: entry.color1.g,
+        空白組_B: entry.color1.b,
+        樣品組_R: entry.color2.r,
+        樣品組_G: entry.color2.g,
+        樣品組_B: entry.color2.b,
+        Slope_B1: entry.slope ? entry.slope.b1 : "",
+        Slope_B2: entry.slope ? entry.slope.b2 : ""
+    }));
 
-document.getElementById('startBtn').addEventListener('click', async () => {
-    await startCamera();
-});
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "分析結果");
+    XLSX.writeFile(workbook, "RGB分析結果.xlsx");
+}
 
 function calculateQuartiles(values) {
     if (!Array.isArray(values) || values.length === 0) {
@@ -257,5 +269,15 @@ function showQuartiles() {
     const percentReduction = calculatePercentageReduction(b1Stats, b2Stats);
     const percentResult = percentReduction.average;
     localStorage.setItem("rate", percentResult);
+
+    exportToExcel(); // ⚡️ 自動匯出 Excel
     location.href = "Results.html";
 }
+
+startCamera();
+makeDraggable(redBox1);
+makeDraggable(redBox2);
+
+document.getElementById('startBtn').addEventListener('click', async () => {
+    await startCamera();
+});
