@@ -168,10 +168,10 @@ button:hover {
 }
 
 /* 特殊按鈕樣式 */
-#showStepsBtn {
+#analyzeBtn {
     background-color: #f5a623;
 }
-#showStepsBtn:hover {
+#analyzeBtn:hover {
     background-color: #d48806;
 }
 
@@ -242,4 +242,36 @@ button:hover {
     font-family: sans-serif;
     z-index: 1000;
     pointer-events: none; /* 防止點到它干擾其他操作 */
+}
+
+.inline-hint {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 6px 16px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    color: #2c5f2d;
+    z-index: 10;
+    font-size: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.spinner-inline {
+    width: 14px;
+    height: 14px;
+    border: 3px solid #ccc;
+    border-top: 3px solid #2c5f2d;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 5px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
