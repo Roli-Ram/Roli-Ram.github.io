@@ -62,6 +62,6 @@ if (rateRaw === null) {
         }
         const offset = circumference - (current / 100) * circumference;
         circle.style.strokeDashoffset = offset;
-        text.textContent = Math.round(current) + '%';
+        text.textContent = current.toFixed(2) + '%';
     }, stepTime);
 }
