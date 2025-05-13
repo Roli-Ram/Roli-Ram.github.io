@@ -231,9 +231,16 @@ function calculatePercentageReduction(b1Stats, b2Stats) {
         q2Percent: q2Raw != null ? q2Raw.toFixed(2) + "%" : "N/A",
         average: avg
     };
+}
+    
+
+function showQuartiles() {
+    const b1Values = logRGBValues.map(entry => parseFloat(entry.slope.b1));
+    const b2Values = logRGBValues.map(entry => parseFloat(entry.slope.b2));
+    const b1Stats = calculateQuartiles(b1Values);
+    const b2Stats = calculateQuartiles(b2Values);
+    const percentReduction = calculatePercentageReduction(b1Stats, b2Stats);
     const percentResult = percentReduction.average;
     localStorage.setItem("rate", percentResult);
     location.href = "Results.html";
-
 }
-    
