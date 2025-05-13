@@ -274,37 +274,6 @@ function calculatePercentageReduction(b1Stats, b2Stats) {
     };
 }
 
-function downloadExcel(logRGBValues) {
-    const wb = XLSX.utils.book_new();
-
-    const wsData = [
-        ["Time (s)", 
-         "Blank R", "Blank G", "Blank B", 
-         "Sample R", "Sample G", "Sample B", 
-         "Slope B1 (Blank)", "Slope B2 (Sample)"]
-    ];
-
-    logRGBValues.forEach(entry => {
-        wsData.push([
-            entry.time,
-            entry.color1.r, entry.color1.g, entry.color1.b,
-            entry.color2.r, entry.color2.g, entry.color2.b,
-            entry.slope ? entry.slope.b1 : "",  // 若是第一筆，slope 為 null
-            entry.slope ? entry.slope.b2 : ""
-        ]);
-    });
-
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-    XLSX.utils.book_append_sheet(wb, ws, "RGB & Slope Data");
-
-    const deviceInfo = getDeviceBrandModel(); // 若你已經有這個函式
-    const date = new Date();
-    const dateStr = `${date.getFullYear()}${(date.getMonth()+1).toString().padStart(2, '0')}${date.getDate().toString().padStart(2, '0')}`;
-    const filename = `${deviceInfo}_${dateStr}_RGB.xlsx`;
-
-    XLSX.writeFile(wb, filename);
-}
-
 function showQuartiles() {
     // 過濾有效資料
     const validData = logRGBValues.filter(entry =>
@@ -326,7 +295,6 @@ function showQuartiles() {
     const percentResult = percentReduction.average;
 
     // 儲存並跳轉
-    downloadExcel(logRGBValues);
     localStorage.setItem("rate", percentResult);
     location.href = "Results.html";
 }
