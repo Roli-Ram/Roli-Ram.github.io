@@ -193,7 +193,7 @@ analyzeBtn.addEventListener('click', async function () {
             樣品組 RGB: (${color2.r.toFixed(3)}, ${color2.g.toFixed(3)}, ${color2.b.toFixed(3)})<br>
         `;
 
-        intervalCount -= 1;
+        intervalCount -= 2;
 
         if (intervalCount < 0) {
             clearInterval(interval);
