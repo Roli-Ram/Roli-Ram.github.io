@@ -1,4 +1,4 @@
-// ⛓️ 初始化 DOM 元件
+// DOM 元件初始化
 const video = document.getElementById('camera');
 const analyzeBtn = document.getElementById('analyzeBtn');
 const stopBtn = document.getElementById('stopBtn');
@@ -198,13 +198,41 @@ function toggleTorch(on) {
         const track = stream.getVideoTracks()[0];
         const capabilities = track.getCapabilities();
         if (capabilities.torch) {
-            track.applyConstraints({
-                advanced: [{ torch: on }]
-            });
+            track.applyConstraints({ advanced: [{ torch: on }] });
         }
     } catch (err) {
         console.error("無法控制手電筒: ", err);
     }
+}
+
+function calculateQuartiles(values) {
+    if (!Array.isArray(values) || values.length === 0) {
+        return { q1: "N/A", q2: "N/A" };
+    }
+    values.sort((a, b) => a - b);
+    const q1 = values[Math.floor((values.length - 1) * 0.25)];
+    const q2 = values[Math.floor((values.length - 1) * 0.5)];
+    return {
+        q1: q1 !== undefined ? q1.toFixed(3) : "N/A",
+        q2: q2 !== undefined ? q2.toFixed(3) : "N/A"
+    };
+}
+
+function calculatePercentageReduction(b1Stats, b2Stats) {
+    function safePercent(qB1, qB2) {
+        const n1 = parseFloat(qB1);
+        const n2 = parseFloat(qB2);
+        if (n1 === 0) return null;
+        return (1 - (n2 / n1)) * 100;
+    }
+    const q1Raw = safePercent(b1Stats.q1, b2Stats.q1);
+    const q2Raw = safePercent(b1Stats.q2, b2Stats.q2);
+    const avg = (q1Raw != null && q2Raw != null) ? ((q1Raw + q2Raw) / 2).toFixed(2) + "%" : "N/A";
+    return {
+        q1Percent: q1Raw != null ? q1Raw.toFixed(2) + "%" : "N/A",
+        q2Percent: q2Raw != null ? q2Raw.toFixed(2) + "%" : "N/A",
+        average: avg
+    };
 }
 
 function exportToExcel() {
@@ -220,44 +248,29 @@ function exportToExcel() {
         Slope_B2: entry.slope ? entry.slope.b2 : ""
     }));
 
+    const validData = logRGBValues.filter(entry => entry.slope && entry.slope.b1 !== undefined && entry.slope.b2 !== undefined);
+    const b1Values = validData.map(entry => parseFloat(entry.slope.b1));
+    const b2Values = validData.map(entry => parseFloat(entry.slope.b2));
+    const b1Stats = calculateQuartiles(b1Values);
+    const b2Stats = calculateQuartiles(b2Values);
+    const percentReduction = calculatePercentageReduction(b1Stats, b2Stats);
+
+    exportData.push({
+        Time: "統計",
+        空白組_R: "",
+        空白組_G: "",
+        空白組_B: "",
+        樣品組_R: "",
+        樣品組_G: "",
+        樣品組_B: "",
+        Slope_B1: `Q1=${b1Stats.q1}, Q2=${b1Stats.q2}`,
+        Slope_B2: `Q1=${b2Stats.q1}, Q2=${b2Stats.q2}, 平均減少=${percentReduction.average}`
+    });
+
     const worksheet = XLSX.utils.json_to_sheet(exportData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "分析結果");
     XLSX.writeFile(workbook, "RGB分析結果.xlsx");
-}
-
-function calculateQuartiles(values) {
-    if (!Array.isArray(values) || values.length === 0) {
-        return { q1: "N/A", q2: "N/A" };
-    }
-
-    values.sort((a, b) => a - b);
-    const q1 = values[Math.floor((values.length - 1) * 0.25)];
-    const q2 = values[Math.floor((values.length - 1) * 0.5)];
-
-    return {
-        q1: q1 !== undefined ? q1.toFixed(3) : "N/A",
-        q2: q2 !== undefined ? q2.toFixed(3) : "N/A"
-    };
-}
-
-function calculatePercentageReduction(b1Stats, b2Stats) {
-    function safePercent(qB1, qB2) {
-        const n1 = parseFloat(qB1);
-        const n2 = parseFloat(qB2);
-        if (n1 === 0) return null;
-        return (1 - (n2 / n1)) * 100;
-    }
-
-    const q1Raw = safePercent(b1Stats.q1, b2Stats.q1);
-    const q2Raw = safePercent(b1Stats.q2, b2Stats.q2);
-    const avg = (q1Raw != null && q2Raw != null) ? ((q1Raw + q2Raw) / 2).toFixed(2) + "%" : "N/A";
-
-    return {
-        q1Percent: q1Raw != null ? q1Raw.toFixed(2) + "%" : "N/A",
-        q2Percent: q2Raw != null ? q2Raw.toFixed(2) + "%" : "N/A",
-        average: avg
-    };
 }
 
 function showQuartiles() {
@@ -270,7 +283,7 @@ function showQuartiles() {
     const percentResult = percentReduction.average;
     localStorage.setItem("rate", percentResult);
 
-    exportToExcel(); // ⚡️ 自動匯出 Excel
+    exportToExcel(); // 自動匯出 Excel
     location.href = "Results.html";
 }
 
