@@ -166,6 +166,13 @@ analyzeBtn.addEventListener('click', async function () {
                 color2: { r: color2.r.toFixed(3), g: color2.g.toFixed(3), b: color2.b.toFixed(3) },
                 slope
             });
+        } else {
+            logRGBValues.push({
+                time: intervalCount * 2,
+                color1: { r: color1.r.toFixed(3), g: color1.g.toFixed(3), b: color1.b.toFixed(3) },
+                color2: { r: color2.r.toFixed(3), g: color2.g.toFixed(3), b: color2.b.toFixed(3) },
+                slope: null
+            });
         }
 
         result.innerHTML = `
@@ -208,10 +215,18 @@ document.getElementById('startBtn').addEventListener('click', async () => {
 });
 
 function calculateQuartiles(values) {
+    if (!Array.isArray(values) || values.length === 0) {
+        return { q1: "N/A", q2: "N/A" };
+    }
+
     values.sort((a, b) => a - b);
     const q1 = values[Math.floor((values.length - 1) * 0.25)];
     const q2 = values[Math.floor((values.length - 1) * 0.5)];
-    return { q1: q1.toFixed(3), q2: q2.toFixed(3) };
+
+    return {
+        q1: q1 !== undefined ? q1.toFixed(3) : "N/A",
+        q2: q2 !== undefined ? q2.toFixed(3) : "N/A"
+    };
 }
 
 function calculatePercentageReduction(b1Stats, b2Stats) {
@@ -232,11 +247,11 @@ function calculatePercentageReduction(b1Stats, b2Stats) {
         average: avg
     };
 }
-    
 
 function showQuartiles() {
-    const b1Values = logRGBValues.map(entry => parseFloat(entry.slope.b1));
-    const b2Values = logRGBValues.map(entry => parseFloat(entry.slope.b2));
+    const validData = logRGBValues.filter(entry => entry.slope && entry.slope.b1 !== undefined && entry.slope.b2 !== undefined);
+    const b1Values = validData.map(entry => parseFloat(entry.slope.b1));
+    const b2Values = validData.map(entry => parseFloat(entry.slope.b2));
     const b1Stats = calculateQuartiles(b1Values);
     const b2Stats = calculateQuartiles(b2Values);
     const percentReduction = calculatePercentageReduction(b1Stats, b2Stats);
