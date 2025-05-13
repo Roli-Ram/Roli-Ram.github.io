@@ -19,7 +19,14 @@ if (rateRaw === null) {
 } else {
     const percent = parseFloat(rateRaw);
     localStorage.removeItem("rate");
-
+    //  或數值異常
+    if (isNaN(percent) || percent < 0 || percent > 100) {
+        text.textContent = "數值異常";
+        circle.style.stroke = "#ccc";
+        status.textContent = "請確認實驗數據";
+        status.style.color = "#999";
+        return;  
+    }
     // 判斷等級與顏色
     let color = '';
     let label = '';
