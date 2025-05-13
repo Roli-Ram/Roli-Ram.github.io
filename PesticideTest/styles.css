@@ -271,6 +271,61 @@ button:hover {
     margin-right: 5px;
 }
 
+@media screen and (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+    
+    html, body {
+        overflow: hidden;  
+        touch-action: none;
+    }
+
+    .container {
+        max-width: 90vw;     
+    }
+
+    #camera {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 4 / 3; 
+        object-fit: contain;  
+        border: 1px solid #ccc;
+    }
+
+    .TopImage {
+        height: 70px;      
+    }
+
+    .hero-text {
+        font-size: 20px;      
+        width: 90%;
+    }
+
+    .header {
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+    }
+
+    .modal-content {
+        width: 90vw;
+        max-height: 70vh;
+    }
+
+    .inline-hint {
+        writing-mode: horizontal-tb; /* 確保是橫的 */
+        transform: none;
+        top: auto;
+        bottom: 10px;  /* 放到底部 */
+        left: 50%;
+        transform: translateX(-50%);
+        flex-direction: row;
+        font-size: 1.1rem;
+        padding: 10px 20px;
+    }
+
+    .spinner-inline {
+        margin-right: 10px;
+    }
+}
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
