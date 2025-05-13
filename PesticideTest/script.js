@@ -163,7 +163,7 @@ analyzeBtn.addEventListener('click', async function () {
     });
 
     result.innerHTML = `
-        時間剩餘: ${intervalCount} 秒<br>
+        剩餘時間: ${intervalCount} 秒<br>
         空白組 RGB: (${color1.r.toFixed(3)}, ${color1.g.toFixed(3)}, ${color1.b.toFixed(3)})<br>
         樣品組 RGB: (${color2.r.toFixed(3)}, ${color2.g.toFixed(3)}, ${color2.b.toFixed(3)})<br>
     `;
