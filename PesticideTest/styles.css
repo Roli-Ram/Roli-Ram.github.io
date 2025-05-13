@@ -272,6 +272,20 @@ button:hover {
     margin-right: 5px;
 }
 
+.inline-hint.vertical {
+    flex-direction: column;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(-90deg);
+    transform-origin: left top;
+    top: 100px;         /* 你可以依畫面微調 */
+    left: 20px;         /* 調整位置 */
+    padding: 10px;
+    border-radius: 8px;
+    height: auto;
+    width: auto;
+}
+
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
