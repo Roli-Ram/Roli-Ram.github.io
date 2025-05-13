@@ -210,22 +210,26 @@ function calculateQuartiles(values) {
         return { q1: "N/A", q2: "N/A" };
     }
 
+    values = values.filter(v => typeof v === 'number' && !isNaN(v));
     values.sort((a, b) => a - b);
 
-    function median(arr) {
+    const median = (arr) => {
         const mid = Math.floor(arr.length / 2);
         if (arr.length % 2 === 0) {
-            return ((arr[mid - 1] + arr[mid]) / 2).toFixed(3);
+            return (arr[mid - 1] + arr[mid]) / 2;
         } else {
-            return arr[mid].toFixed(3);
+            return arr[mid];
         }
-    }
+    };
 
-    const q2 = median(values);
+    const q2Raw = median(values);
     const lowerHalf = values.slice(0, Math.floor(values.length / 2));
-    const q1 = median(lowerHalf);
+    const q1Raw = median(lowerHalf);
 
-    return { q1, q2 };
+    return {
+        q1: q1Raw.toFixed(5),
+        q2: q2Raw.toFixed(5)
+    };
 }
 
 function calculatePercentageReduction(b1Stats, b2Stats) {
@@ -258,7 +262,7 @@ function exportToExcel() {
         Slope_B2: entry.slope ? entry.slope.b2 : ""
     }));
 
-    const validData = logRGBValues.filter(entry => entry.slope && entry.slope.b1 !== undefined && entry.slope.b2 !== undefined);
+    const validData = logRGBValues.filter(entry => entry.slope && !isNaN(entry.slope.b1) && !isNaN(entry.slope.b2));
     const b1Values = validData.map(entry => parseFloat(entry.slope.b1));
     const b2Values = validData.map(entry => parseFloat(entry.slope.b2));
     const b1Stats = calculateQuartiles(b1Values);
