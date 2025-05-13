@@ -209,13 +209,23 @@ function calculateQuartiles(values) {
     if (!Array.isArray(values) || values.length === 0) {
         return { q1: "N/A", q2: "N/A" };
     }
+
     values.sort((a, b) => a - b);
-    const q1 = values[Math.floor((values.length - 1) * 0.25)];
-    const q2 = values[Math.floor((values.length - 1) * 0.5)];
-    return {
-        q1: q1 !== undefined ? q1.toFixed(3) : "N/A",
-        q2: q2 !== undefined ? q2.toFixed(3) : "N/A"
-    };
+
+    function median(arr) {
+        const mid = Math.floor(arr.length / 2);
+        if (arr.length % 2 === 0) {
+            return ((arr[mid - 1] + arr[mid]) / 2).toFixed(3);
+        } else {
+            return arr[mid].toFixed(3);
+        }
+    }
+
+    const q2 = median(values);
+    const lowerHalf = values.slice(0, Math.floor(values.length / 2));
+    const q1 = median(lowerHalf);
+
+    return { q1, q2 };
 }
 
 function calculatePercentageReduction(b1Stats, b2Stats) {
@@ -255,7 +265,6 @@ function exportToExcel() {
     const b2Stats = calculateQuartiles(b2Values);
     const percentReduction = calculatePercentageReduction(b1Stats, b2Stats);
 
-    // 🧮 ➕ 統計列獨立欄位輸出
     exportData.push({
         Time: "統計",
         空白組_R: "",
