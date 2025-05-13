@@ -115,8 +115,6 @@ function getAverageColor(box) {
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
     const videoRect = video.getBoundingClientRect();
-    const containerRect = document.querySelector('.container').getBoundingClientRect();
-
     const scaleX = video.videoWidth / videoRect.width;
     const scaleY = video.videoHeight / videoRect.height;
 
@@ -125,10 +123,15 @@ function getAverageColor(box) {
     const boxWidth = box.offsetWidth;
     const boxHeight = box.offsetHeight;
 
-    const boxX = (boxLeft + containerRect.left - videoRect.left) * scaleX;
-    const boxY = (boxTop + containerRect.top - videoRect.top) * scaleY;
+    const boxX = boxLeft * scaleX;
+    const boxY = boxTop * scaleY;
+    const boxW = boxWidth * scaleX;
+    const boxH = boxHeight * scaleY;
 
-    const imageData = ctx.getImageData(boxX, boxY, boxWidth * scaleX, boxHeight * scaleY).data;
+    const safeX = Math.max(0, Math.min(boxX, canvas.width - boxW));
+    const safeY = Math.max(0, Math.min(boxY, canvas.height - boxH));
+
+    const imageData = ctx.getImageData(safeX, safeY, boxW, boxH).data;
 
     let r = 0, g = 0, b = 0, count = 0;
     for (let i = 0; i < imageData.length; i += 4) {
