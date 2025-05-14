@@ -259,24 +259,7 @@ makeDraggable(redBox2);
 //20250514
 document.getElementById('startBtn').addEventListener('click', async () => {
     await startCamera();
-   // 等待攝影機 metadata 載入後再進行處理
-    video.onloadeddata = () => {
-        updateRedBoxPositions();
-
-        setTimeout(() => {
-            analyzingOverlay.style.display = 'flex'; // 顯示提示條
-
-            const color1 = getAverageColor(redBox1);
-            const color2 = getAverageColor(redBox2);
-
-            document.getElementById('rgb1').textContent =
-                `空白組 RGB：(${color1.r.toFixed(3)}, ${color1.g.toFixed(3)}, ${color1.b.toFixed(3)})`;
-
-            document.getElementById('rgb2').textContent =
-                `樣品組 RGB：(${color2.r.toFixed(3)}, ${color2.g.toFixed(3)}, ${color2.b.toFixed(3)})`;
-
-        }, 500); // 稍微等待畫面穩定
-    };
+  
 });
 //20250514
    
