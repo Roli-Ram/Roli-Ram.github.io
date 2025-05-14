@@ -23,10 +23,7 @@ async function startCamera() {
         const constraints = {
                 video: {
                     facingMode: 'environment',
-                    width: { ideal: 720 },
-                    height: { ideal: 960 },
-                    aspectRatio: 3 / 4
-                }
+                        }
         };
 
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
