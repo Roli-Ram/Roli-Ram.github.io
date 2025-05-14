@@ -1,66 +1,19 @@
-/* --- 全域畫面控制 --- */
-html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    overflow: hidden;              /* 禁止整頁上下滑動 */
-    touch-action: none;           /* 禁止手指滑動造成整頁滾動 */
-    overscroll-behavior: contain;
-    font-family: 'Segoe UI', sans-serif;
-    background: #f7fff5;
-    color: #333;
+body {
+    font-family: Arial, sans-serif;
     text-align: center;
+    margin-top: 50px;
 }
 
-/* --- 頁首圖與文字 --- */
-.hero {
-    position: relative;
-    width: 100%;
-    max-height: 250px;
-    overflow: hidden;
-    margin-bottom: 20px;
-}
-
-.hero img {
-    width: 100%;
-    height: auto;
-    object-fit: cover;
-    filter: brightness(70%);
-}
-
-.hero-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: #fff;
-    font-size: 28px;
-    font-weight: bold;
-    text-shadow: 1px 1px 5px #000;
-}
-
-/* --- 主容器 --- */
 .container {
     position: relative;
     display: inline-block;
     width: 100%;
     max-width: 400px;
+    height: auto;
 }
 
-/* --- 攝影畫面與限制高度 --- */
-#camera {
-    width: 100%;
-    aspect-ratio: 4 / 3;         /* 鎖定 4:3 比例，防止變形 */
-    max-height: 300px;          /* 限制相機最高不超過畫面 */
-    object-fit: cover;
-    display: block;
-    border: 1px solid #ccc;
-}
-
-/* --- 紅框區塊 --- */
 .redBox {
     position: absolute;
-    pointer-events: auto;
     border: 2px solid red;
     width: 75px;
     height: 30px;
@@ -76,16 +29,17 @@ html, body {
 }
 
 #redBox1 {
-    top: 150px;
-    left: 100px;
+    top: 50%;
+    left: 30%;
+    transform: translate(-50%, -50%);
 }
 
 #redBox2 {
-    top: 50px;
-    left: 100px;
+    top: 25%;
+    left: 30%;
+    transform: translate(-50%, -50%);
 }
 
-/* 手機微調紅框位置 */
 @media screen and (max-width: 768px) {
     #redBox1 {
         top: 50%;
@@ -93,11 +47,6 @@ html, body {
     }
 }
 
-.redBox.fixed {
-    pointer-events: none;
-}
-
-/* 紅框文字標籤 */
 .boxLabel {
     position: absolute;
     top: 125%;
@@ -112,88 +61,28 @@ html, body {
     text-align: center;
 }
 
-/* 分析結果顯示 */
+#analyzeBtn {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
 #result {
     margin-top: 20px;
     font-size: 16px;
 }
 
-/* 按鈕通用樣式 */
-button {
-    background-color: #6ab04c;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    margin: 10px 5px;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+#blueChart {
+    width: 100% !important;
+    height: auto !important;
+    max-width: 100%;
+    margin-top: 20px;
 }
 
-button:hover {
-    background-color: #4a943e;
-}
-
-/* 特殊按鈕樣式 */
-#showStepsBtn {
-    background-color: #f5a623;
-}
-#showStepsBtn:hover {
-    background-color: #d48806;
-}
-
-/* Modal 彈窗樣式 */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 999;
-    padding-top: 60px;
-    left: 0;
-    top: 0;
+#camera {
     width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.4);
-}
-
-.modal-content {
-    background-color: #fff;
-    margin: auto;
-    padding: 20px 25px;
-    border-radius: 10px;
-    width: 400px;
-    max-width: 90%;
-    max-height: 80%;
-    overflow-y: auto;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    position: relative;
-    font-size: 15px;
-}
-
-.close-button {
-    color: #aaa;
-    float: right;
-    font-size: 24px;
-    font-weight: bold;
-    position: absolute;
-    top: 10px;
-    right: 20px;
-    cursor: pointer;
-}
-
-.close-button:hover {
-    color: #000;
-}
-
-.modal-content ol {
-    padding-left: 1.2em;
-    margin: 0;
-    list-style-position: inside;
-}
-
-.modal-content li {
-    margin: 8px 0;
-    text-indent: -1.2em;
-    padding-left: 1.2em;
+    max-width: 480px;
+    height: auto;
+    border: 1px solid #ccc;
 }
