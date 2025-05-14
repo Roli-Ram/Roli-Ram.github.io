@@ -21,11 +21,9 @@ async function startCamera() {
 
     try {
         const constraints = {
-                video: {
-                    facingMode: 'environment',
-                        }
+            video: { facingMode: 'environment' }
         };
-
+        
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
             throw new Error("瀏覽器不支持 getUserMedia");
         }
