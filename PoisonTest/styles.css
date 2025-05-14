@@ -5,6 +5,7 @@ body {
 }
 
 .container {
+    touch-action: none;
     position: relative;
     display: inline-block;
     width: 100%;

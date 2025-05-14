@@ -1,3 +1,18 @@
+
+function getDeviceBrandModel() {
+    const ua = navigator.userAgent;
+    if (/android/i.test(ua)) {
+        const modelMatch = ua.match(/Android.*?;\s*(.+?)\s*Build/);
+        const model = modelMatch ? modelMatch[1].trim() : "Android";
+        const brandMatch = ua.match(/\((.*?)\)/);
+        const brand = brandMatch ? brandMatch[1].split(";")[0].trim() : "Android";
+        return `${brand}_${model}`.replace(/\s+/g, "_");
+    } else if (/iphone/i.test(ua)) return "Apple_iPhone";
+    else if (/ipad/i.test(ua)) return "Apple_iPad";
+    else return "Unknown_Device";
+}
+
+// 保留原始其他變數與函式
 function getDeviceBrandModel() {
     const ua = navigator.userAgent;
     if (/android/i.test(ua)) {
@@ -81,7 +96,65 @@ function startCamera() {
     });
 }
 
+
 function makeDraggable(box) {
+    let offsetX = 0, offsetY = 0, isDragging = false;
+
+    const container = document.querySelector('.container');
+
+    function startDragging(e) {
+        e.preventDefault();
+        isDragging = true;
+
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+        offsetX = clientX - box.getBoundingClientRect().left;
+        offsetY = clientY - box.getBoundingClientRect().top;
+
+        document.body.style.cursor = 'grabbing';
+        document.body.style.touchAction = 'none';
+
+        window.addEventListener('mousemove', moveDragging);
+        window.addEventListener('touchmove', moveDragging, { passive: false });
+        window.addEventListener('mouseup', stopDragging);
+        window.addEventListener('touchend', stopDragging);
+    }
+
+    function moveDragging(e) {
+        if (!isDragging) return;
+        e.preventDefault();
+
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+        const containerRect = container.getBoundingClientRect();
+
+        const left = clientX - containerRect.left - offsetX;
+        const top = clientY - containerRect.top - offsetY;
+
+        box.style.left = `${left}px`;
+        box.style.top = `${top}px`;
+
+        redBoxPositions[box.id] = { left, top };
+    }
+
+    function stopDragging() {
+        isDragging = false;
+        document.body.style.cursor = 'default';
+        document.body.style.touchAction = '';
+
+        window.removeEventListener('mousemove', moveDragging);
+        window.removeEventListener('touchmove', moveDragging);
+        window.removeEventListener('mouseup', stopDragging);
+        window.removeEventListener('touchend', stopDragging);
+    }
+
+    box.addEventListener('mousedown', startDragging);
+    box.addEventListener('touchstart', startDragging, { passive: false });
+}
+
+// 補上原始其餘 script.js 內容
     let offsetX = 0, offsetY = 0, isDragging = false;
 
     function startDragging(e) {
