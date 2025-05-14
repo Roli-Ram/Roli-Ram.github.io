@@ -1,0 +1,88 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin-top: 50px;
+}
+
+.container {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    max-width: 400px;
+    height: auto;
+}
+
+.redBox {
+    position: absolute;
+    border: 2px solid red;
+    width: 75px;
+    height: 30px;
+    cursor: move;
+    z-index: 10;
+    background-color: rgba(255, 0, 0, 0.2);
+}
+
+#redBox1, #redBox2 {
+    width: 75px;
+    height: 30px;
+    position: absolute;
+}
+
+#redBox1 {
+    top: 50%;
+    left: 30%;
+    transform: translate(-50%, -50%);
+}
+
+#redBox2 {
+    top: 25%;
+    left: 30%;
+    transform: translate(-50%, -50%);
+}
+
+@media screen and (max-width: 768px) {
+    #redBox1 {
+        top: 50%;
+        transform: translate(-50%, -45%);
+    }
+}
+
+.boxLabel {
+    position: absolute;
+    top: 125%;
+    left: -15px;
+    transform: translateY(-50%) rotate(-90deg);
+    transform-origin: left center;
+    font-size: 10px;
+    color: yellow;
+    background-color: rgba(100, 50, 100, 0.7);
+    padding: 2px 5px;
+    border-radius: 3px;
+    text-align: center;
+}
+
+#analyzeBtn {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+#result {
+    margin-top: 20px;
+    font-size: 16px;
+}
+
+#blueChart {
+    width: 100% !important;
+    height: auto !important;
+    max-width: 100%;
+    margin-top: 20px;
+}
+
+#camera {
+    width: 100%;
+    max-width: 480px;
+    height: auto;
+    border: 1px solid #ccc;
+}
