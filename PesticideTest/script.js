@@ -259,22 +259,27 @@ makeDraggable(redBox2);
 //20250514
 document.getElementById('startBtn').addEventListener('click', async () => {
     await startCamera();
-    updateRedBoxPositions();  // 更新紅框位置
-    setTimeout(() => {
-    updateRGBDisplayOnce(); // 顯示 RGB
-    }, 500); // 等畫面穩定
+   // 等待攝影機 metadata 載入後再進行處理
+    video.onloadeddata = () => {
+        updateRedBoxPositions();
+
+        setTimeout(() => {
+            analyzingOverlay.style.display = 'flex'; // 顯示提示條
+
+            const color1 = getAverageColor(redBox1);
+            const color2 = getAverageColor(redBox2);
+
+            document.getElementById('rgb1').textContent =
+                `空白組 RGB：(${color1.r.toFixed(3)}, ${color1.g.toFixed(3)}, ${color1.b.toFixed(3)})`;
+
+            document.getElementById('rgb2').textContent =
+                `樣品組 RGB：(${color2.r.toFixed(3)}, ${color2.g.toFixed(3)}, ${color2.b.toFixed(3)})`;
+
+        }, 500); // 稍微等待畫面穩定
+    };
 });
 //20250514
-function updateRGBDisplayOnce() {
-    // 立刻顯示
-	analyzingOverlay.style.display = 'flex'; //  顯示提示條
-    const rgb1 = getAverageColor(redBox1);
-    const rgb2 = getAverageColor(redBox2);
-
-    document.getElementById('rgb1').textContent = `空白組 RGB：(${rgb1.r}, ${rgb1.g}, ${rgb1.b})`;
-    document.getElementById('rgb2').textContent = `樣品組 RGB：(${rgb2.r}, ${rgb2.g}, ${rgb2.b})`;
-}
-	//    
+   
 function calculatePercentageReduction(b1Stats, b2Stats) {
     function safePercent(qB1, qB2) {
         const n1 = parseFloat(qB1);
