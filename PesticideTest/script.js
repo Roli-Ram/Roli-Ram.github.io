@@ -273,7 +273,8 @@ function updateRGBDisplayOnce() {
 
     document.getElementById('rgb1').textContent = `空白組 RGB：(${rgb1.r}, ${rgb1.g}, ${rgb1.b})`;
     document.getElementById('rgb2').textContent = `樣品組 RGB：(${rgb2.r}, ${rgb2.g}, ${rgb2.b})`;
-//    
+}
+	//    
 function calculatePercentageReduction(b1Stats, b2Stats) {
     function safePercent(qB1, qB2) {
         const n1 = parseFloat(qB1);
