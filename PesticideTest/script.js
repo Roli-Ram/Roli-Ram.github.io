@@ -256,11 +256,24 @@ function toggleTorch(on) {
 startCamera();
 makeDraggable(redBox1);
 makeDraggable(redBox2);
-
+//20250514
 document.getElementById('startBtn').addEventListener('click', async () => {
     await startCamera();
+    updateRedBoxPositions();  // 更新紅框位置
+    setTimeout(() => {
+    updateRGBDisplayOnce(); // 顯示 RGB
+    }, 500); // 等畫面穩定
 });
+//20250514
+function updateRGBDisplayOnce() {
+    // 立刻顯示
+	analyzingOverlay.style.display = 'flex'; //  顯示提示條
+    const rgb1 = getAverageColor(redBox1);
+    const rgb2 = getAverageColor(redBox2);
 
+    document.getElementById('rgb1').textContent = `空白組 RGB：(${rgb1.r}, ${rgb1.g}, ${rgb1.b})`;
+    document.getElementById('rgb2').textContent = `樣品組 RGB：(${rgb2.r}, ${rgb2.g}, ${rgb2.b})`;
+//    
 function calculatePercentageReduction(b1Stats, b2Stats) {
     function safePercent(qB1, qB2) {
         const n1 = parseFloat(qB1);
