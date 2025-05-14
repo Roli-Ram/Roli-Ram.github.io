@@ -259,7 +259,23 @@ makeDraggable(redBox2);
 //20250514
 document.getElementById('startBtn').addEventListener('click', async () => {
     await startCamera();
-  
+  // 等待鏡頭準備好後再抓取畫面
+    video.onloadedmetadata = () => {
+        video.play();
+
+        // 更新紅框位置
+        updateRedBoxPositions();
+
+        // 抓取紅框 RGB 值
+        const color1 = getAverageColor(redBox1);
+        const color2 = getAverageColor(redBox2);
+
+        // 顯示在 result 區塊
+        result.innerHTML = `
+            空白組 RGB: (${color1.r.toFixed(3)}, ${color1.g.toFixed(3)}, ${color1.b.toFixed(3)})<br>
+            樣品組 RGB: (${color2.r.toFixed(3)}, ${color2.g.toFixed(3)}, ${color2.b.toFixed(3)})<br>
+        `;
+    };
 });
 //20250514
    
