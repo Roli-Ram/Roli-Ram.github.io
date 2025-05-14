@@ -80,13 +80,9 @@ html, body {
 /* --- 攝影畫面與限制高度 --- */
 #camera {
     width: 100%;
-    max-width: 800px;
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 3 / 4;
     object-fit: contain;
-    background-color: black;
-    display: block;
-    margin: 0 auto;
-    border: 1px solid #ccc;
+    background: black;
 }
 
 
