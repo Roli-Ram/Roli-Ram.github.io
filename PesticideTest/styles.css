@@ -82,10 +82,11 @@ html, body {
     width: 100%;
     max-width: 800px;
     aspect-ratio: 4 / 3;
-    object-fit: cover;   
-    border: 1px solid #ccc;
+    object-fit: contain;
+    background-color: black;
     display: block;
     margin: 0 auto;
+    border: 1px solid #ccc;
 }
 
 
