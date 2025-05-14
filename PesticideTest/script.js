@@ -259,11 +259,6 @@ makeDraggable(redBox2);
 
 document.getElementById('startBtn').addEventListener('click', async () => {
     await startCamera();
- // 等待畫面穩定後抓取 RGB（避免還沒畫出畫面就抓）
-    setTimeout(() => {
-        updateRedBoxPositions();  // ⭐️ 確保座標更新（必要）
-        updateRGBDisplayOnce();   // 只顯示紅框 RGB
-    }, 500); // 給 video 500 毫秒的時間顯示畫面  
 });
 
 function calculatePercentageReduction(b1Stats, b2Stats) {
