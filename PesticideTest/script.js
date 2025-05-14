@@ -21,8 +21,14 @@ async function startCamera() {
 
     try {
         const constraints = {
-            video: { facingMode: 'environment' }
+                video: {
+                    facingMode: 'environment',
+                    width: { ideal: 720 },
+                    height: { ideal: 960 },
+                    aspectRatio: 3 / 4
+                }
         };
+
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
             throw new Error("瀏覽器不支持 getUserMedia");
         }
