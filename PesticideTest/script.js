@@ -260,6 +260,7 @@ makeDraggable(redBox2);
 document.getElementById('startBtn').addEventListener('click', async () => {
     await startCamera();
      // 更新紅框位置
+    video.onloadeddata = () => {
         updateRedBoxPositions();
 
         // 抓取紅框 RGB 值
@@ -271,8 +272,8 @@ document.getElementById('startBtn').addEventListener('click', async () => {
             空白組 RGB: (${color1.r.toFixed(3)}, ${color1.g.toFixed(3)}, ${color1.b.toFixed(3)})<br>
             樣品組 RGB: (${color2.r.toFixed(3)}, ${color2.g.toFixed(3)}, ${color2.b.toFixed(3)})<br>
         `;
-    };    
-});
+    };
+    });    
 //20250514
    
 function calculatePercentageReduction(b1Stats, b2Stats) {
