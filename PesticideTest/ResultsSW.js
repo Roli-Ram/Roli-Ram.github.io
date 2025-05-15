@@ -9,6 +9,7 @@ circle.style.strokeDasharray = circumference;
 circle.style.strokeDashoffset = circumference;
 
 const rateRaw = localStorage.getItem("rate");
+let percent = parseFloat(rateRaw);
 
 if (rateRaw === null) {
     // 沒有資料 → 不顯示動畫與數值，顯示錯誤提示
@@ -17,7 +18,7 @@ if (rateRaw === null) {
     document.getElementById("statusText").textContent = "未接收到資料";
     document.getElementById("statusText").style.color = "#999";
 } 
-else if ( rateRaw < 0 || rateRaw > 100) {
+else if ( percent < -5 || percent > 100) {
     document.getElementById("percentText").textContent = "檢測率異常";
     document.getElementById("fgCircle").style.stroke = "#ccc";
     document.getElementById("statusText").textContent = "請檢查數據";
@@ -25,9 +26,11 @@ else if ( rateRaw < 0 || rateRaw > 100) {
     }
 else 
 {
-    const percent = parseFloat(rateRaw);
     localStorage.removeItem("rate");
-
+    
+     if ( percent < 0 && percent >= -5 ) {
+        percent = 0 ;
+    }
     // 判斷等級與顏色
     let color = '';
     let label = '';
