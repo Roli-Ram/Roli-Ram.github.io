@@ -7,7 +7,7 @@ async function uploadSampleLog() {
 
   document.getElementById("status").innerText = "上傳中...";
 
-  const token = "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";
+  const token = "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";
   const username = "Roli-Ram";
   const repo = "RGBlog";
   const branch = "main";
