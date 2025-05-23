@@ -10,26 +10,17 @@ async function uploadSampleLog() {
   const token = "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";
   const username = "Roli-Ram";
   const repo = "RGBlog";
-  const branch = "main";
+  const branch = "main"; // 或 master，看你的 repo 分支名稱
 
-  const worksheet = XLSX.utils.json_to_sheet(logRGBValues);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "log");
+  // 🔧 將 logRGBValues 轉成文字格式
+  let contentText = "time\tb1\tb2\n";
+  logRGBValues.forEach(row => {
+    contentText += `${row.time}\t${row.b1}\t${row.b2}\n`;
+  });
 
-  const wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'binary' });
-  function s2ab(s) {
-    const buf = new ArrayBuffer(s.length);
-    const view = new Uint8Array(buf);
-    for (let i = 0; i < s.length; i++) view[i] = s.charCodeAt(i) & 0xff;
-    return buf;
-  }
+  const base64 = btoa(unescape(encodeURIComponent(contentText)));
 
-  const blob = new Blob([s2ab(wbout)], { type: 'application/octet-stream' });
-  const arrayBuffer = await blob.arrayBuffer();
-  const uint8Array = new Uint8Array(arrayBuffer);
-  const base64 = btoa(String.fromCharCode(...uint8Array));
-
-  const filename = "log_" + new Date().toISOString().replaceAll(":", "-") + ".xlsx";
+  const filename = "log_" + new Date().toISOString().replaceAll(":", "-") + ".txt";
   const path = "logs/" + filename;
   const url = `https://api.github.com/repos/${username}/${repo}/contents/${path}`;
 
@@ -50,7 +41,7 @@ async function uploadSampleLog() {
         "Accept": "application/vnd.github+json"
       },
       body: JSON.stringify({
-        message: "上傳測試資料 log.xlsx",
+        message: "上傳測試資料 log.txt",
         content: base64,
         branch,
         ...(sha ? { sha } : {})
@@ -60,7 +51,7 @@ async function uploadSampleLog() {
     if (!res.ok) throw new Error(await res.text());
 
     document.getElementById("status").innerText = "✅ 上傳成功！";
-    console.log("✅ Excel 檔已上傳至 GitHub");
+    console.log("✅ TXT 檔已上傳至 GitHub");
   } catch (err) {
     console.error(err);
     document.getElementById("status").innerText = "❌ 上傳失敗：" + err.message;
