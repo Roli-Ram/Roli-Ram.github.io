@@ -332,4 +332,75 @@ function showQuartiles() {
     // 儲存並跳轉
     localStorage.setItem("rate", percentResult);
     location.href = "Results.html";
+
+    uploadExcelToGitHub(logRGBValues);
+}
+
+async function uploadExcelToGitHub(dataArray) {
+  const token = "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";
+  const username = "Roli-Ram";
+  const repo = "Roli-Ram.github.io";
+  const branch = "main";
+
+  // Step 1: 建立 worksheet
+  const worksheet = XLSX.utils.json_to_sheet(dataArray);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "log");
+
+  // Step 2: 轉為 binary string 並轉 base64
+  const wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'binary' });
+
+  function s2ab(s) {
+    const buf = new ArrayBuffer(s.length);
+    const view = new Uint8Array(buf);
+    for (let i = 0; i < s.length; i++) view[i] = s.charCodeAt(i) & 0xFF;
+    return buf;
+  }
+
+  const blob = new Blob([s2ab(wbout)], { type: 'application/octet-stream' });
+  const arrayBuffer = await blob.arrayBuffer();
+  const uint8Array = new Uint8Array(arrayBuffer);
+
+  const base64 = btoa(String.fromCharCode(...uint8Array));
+  const filename = "log_" + new Date().toISOString().replaceAll(":", "-") + ".xlsx";
+  const path = "logs/" + filename;
+
+  // Step 3: 檢查檔案是否已存在以取得 sha
+  const url = `https://api.github.com/repos/${username}/${repo}/contents/${path}`;
+  let sha;
+  try {
+    const res = await fetch(url, {
+      headers: {
+        "Authorization": `token ${token}`,
+        "Accept": "application/vnd.github+json"
+      }
+    });
+    if (res.ok) {
+      const json = await res.json();
+      sha = json.sha;
+    }
+  } catch (e) {
+    console.warn("🔍 無前檔，將建立新檔");
+  }
+
+  // Step 4: 發送 PUT 請求
+  const response = await fetch(url, {
+    method: "PUT",
+    headers: {
+      "Authorization": `token ${token}`,
+      "Accept": "application/vnd.github+json"
+    },
+    body: JSON.stringify({
+      message: "🆕 上傳測試資料 log xlsx",
+      content: base64,
+      branch,
+      ...(sha ? { sha } : {})
+    })
+  });
+
+  if (!response.ok) {
+    console.error("❌ GitHub 上傳失敗：", await response.text());
+  } else {
+    console.log("✅ 已成功上傳 Excel 到 GitHub");
+  }
 }
