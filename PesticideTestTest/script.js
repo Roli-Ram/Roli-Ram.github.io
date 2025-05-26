@@ -334,8 +334,6 @@ function showQuartiles() {
     const percentReduction = calculatePercentageReduction(b1Stats, b2Stats);
     const percentResult = percentReduction.average;
 
-    let percentResult = percentReduction.average;
-
 const forceRange = JSON.parse(localStorage.getItem("forceTargetRange") || "null");
 if (forceRange) {
     const numericResult = parseFloat(percentResult);
