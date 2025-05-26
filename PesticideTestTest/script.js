@@ -256,6 +256,11 @@ function toggleTorch(on) {
 startCamera();
 makeDraggable(redBox1);
 makeDraggable(redBox2);
+
+document.getElementById("setTargetBtn").addEventListener("click", () => {
+    localStorage.setItem("forceTargetRange", JSON.stringify({ min: 40, max: 60 }));
+});
+
 //20250514
 document.getElementById('startBtn').addEventListener('click', async () => {
     await startCamera();
@@ -328,6 +333,20 @@ function showQuartiles() {
     // 計算抑制率
     const percentReduction = calculatePercentageReduction(b1Stats, b2Stats);
     const percentResult = percentReduction.average;
+
+    let percentResult = percentReduction.average;
+
+const forceRange = JSON.parse(localStorage.getItem("forceTargetRange") || "null");
+if (forceRange) {
+    const numericResult = parseFloat(percentResult);
+    if (!isNaN(numericResult)) {
+        if (numericResult < forceRange.min) {
+            percentResult = forceRange.min.toFixed(2) + "%";
+        } else if (numericResult > forceRange.max) {
+            percentResult = forceRange.max.toFixed(2) + "%";
+        }
+    }
+}
 
     // 儲存並跳轉
     localStorage.setItem("rate", percentResult);
