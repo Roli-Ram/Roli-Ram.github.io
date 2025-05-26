@@ -309,6 +309,34 @@ function updateRedBoxPositions() {
     });
 }
 
+// 匯出 Excel 檔案
+function exportToExcel(data) {
+    const wb = XLSX.utils.book_new();
+
+    const worksheetData = [
+        ["時間", "空白組 R", "空白組 G", "空白組 B", "樣品組 R", "樣品組 G", "樣品組 B", "B通道變化量1", "B通道變化量2"]
+    ];
+
+    data.forEach(entry => {
+        worksheetData.push([
+            entry.time,
+            entry.color1.r, entry.color1.g, entry.color1.b,
+            entry.color2.r, entry.color2.g, entry.color2.b,
+            entry.slope ? entry.slope.b1 : "", 
+            entry.slope ? entry.slope.b2 : ""
+        ]);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(worksheetData);
+    XLSX.utils.book_append_sheet(wb, ws, "分析記錄");
+
+    const now = new Date();
+    const pad = n => n.toString().padStart(2, '0');
+    const filename = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}.xlsx`;
+
+    XLSX.writeFile(wb, filename);
+}
+
 function showQuartiles() {
     // 過濾有效資料
     const validData = logRGBValues.filter(entry =>
@@ -328,6 +356,8 @@ function showQuartiles() {
     // 計算抑制率
     const percentReduction = calculatePercentageReduction(b1Stats, b2Stats);
     const percentResult = percentReduction.average;
+
+    exportToExcel(logRGBValues);
 
     // 儲存並跳轉
     localStorage.setItem("rate", percentResult);
