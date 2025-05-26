@@ -257,8 +257,13 @@ startCamera();
 makeDraggable(redBox1);
 makeDraggable(redBox2);
 
-document.getElementById("setTargetBtn").addEventListener("click", () => {
-    localStorage.setItem("forceTargetRange", JSON.stringify({ min: 40, max: 60 }));
+window.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("setTargetBtn");
+    if (btn) {
+        btn.addEventListener("click", () => {
+            localStorage.setItem("forceTargetRange", JSON.stringify({ min: 40, max: 60 }));
+        });
+    }
 });
 
 //20250514
