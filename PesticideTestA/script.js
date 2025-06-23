@@ -176,7 +176,7 @@ analyzeBtn.addEventListener('click', async function () {
     updateRedBoxPositions();
     
     logRGBValues = [];
-    let intervalCount = 180;
+    let intervalCount = 600;
 
     stopBtn.disabled = false;
     analyzeBtn.disabled = true;
