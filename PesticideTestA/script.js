@@ -176,7 +176,7 @@ analyzeBtn.addEventListener('click', async function () {
     updateRedBoxPositions();
     
     logRGBValues = [];
-    let intervalCount = 600;
+    let intervalCount = 180;
 
     stopBtn.disabled = false;
     analyzeBtn.disabled = true;
@@ -373,5 +373,9 @@ function showQuartiles() {
 
     // 儲存並跳轉
     localStorage.setItem("rate", percentResult);
+
+    // 匯出分析結果
+    exportToExcel(logRGBValues);
+    
     location.href = "Results.html";
 }
