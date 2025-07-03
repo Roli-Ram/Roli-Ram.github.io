@@ -369,7 +369,7 @@ function showQuartiles() {
 
     // 計算抑制率
     const percentReduction = calculatePercentageReduction(b1Stats, b2Stats);
-    const percentResult = percentReduction.average;
+    const percentResult = percentReduction.q2Percent;
 
     // 儲存並跳轉
     localStorage.setItem("rate", percentResult);
