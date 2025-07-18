@@ -367,6 +367,14 @@ function showQuartiles() {
     const b1Stats = calculateQuartiles(b1Smoothed);
     const b2Stats = calculateQuartiles(b2Smoothed);
 
+    // 異常確認
+    if (parseFloat(b1Stats.q2) > 0.4) {
+    localStorage.setItem("enzymeError", "酵素棒異常");
+    }
+    else {
+    localStorage.removeItem("enzymeError");
+    }
+
     // 計算抑制率
     const percentReduction = calculatePercentageReduction(b1Stats, b2Stats);
     const percentResult = percentReduction.q2Percent;
