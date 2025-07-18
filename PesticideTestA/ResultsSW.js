@@ -9,6 +9,7 @@ circle.style.strokeDasharray = circumference;
 circle.style.strokeDashoffset = circumference;
 
 const rateRaw = localStorage.getItem("rate");
+const enzymeError = localStorage.getItem("enzymeError");
 let percent = parseFloat(rateRaw);
 
 if (rateRaw === null) {
@@ -18,18 +19,29 @@ if (rateRaw === null) {
     document.getElementById("statusText").textContent = "未接收到資料";
     document.getElementById("statusText").style.color = "#999";
 } 
-else if ( percent < -10 || percent > 100) {
-    document.getElementById("percentText").textContent = "檢測率異常";
+else if (enzymeError) {
+    document.getElementById("percentText").textContent = "酵素棒異常";
     document.getElementById("fgCircle").style.stroke = "#ccc";
-    document.getElementById("statusText").textContent = "請檢查數據";
+    document.getElementById("statusText").textContent = "酵素活性不足";
     document.getElementById("statusText").style.color = "#999";
+    localStorage.removeItem("enzymeError");
+    localStorage.removeItem("rate");
+    return;
     }
 else 
 {
+    localStorage.removeItem("enzymeError");
     localStorage.removeItem("rate");
-    
-     if ( percent < 0 && percent >= -10 ) {
-        percent = 0 ;
+
+    if (parseFloat(rateRaw) < 0) {
+        text.textContent = "樣品異常";
+        circle.style.stroke = "#ccc";
+        status.textContent = "樣品不適用";
+        status.style.color = "#999";
+        return;
+    }
+    if (percent > 100) {
+    percent = 100;
     }
     // 判斷等級與顏色
     let color = '';
