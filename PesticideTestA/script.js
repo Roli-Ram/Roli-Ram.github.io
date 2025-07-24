@@ -368,11 +368,11 @@ function showQuartiles() {
     const b2Stats = calculateQuartiles(b2Smoothed);
 
     // 異常確認
-    if (!isNaN(parseFloat(b1Stats.q2)) && parseFloat(b1Stats.q2) > 0.4) {
-    localStorage.setItem("enzymeError", "酵素棒異常");
+    if (!isNaN(parseFloat(b1Stats.q2)) && parseFloat(b1Stats.q2) < 0.4) {
+    localStorage.setItem("enzymeError", "true");
     }
     else {
-    localStorage.removeItem("enzymeError");
+    localStorage.setItem("enzymeError", "false");
     }
 
     // 計算抑制率
