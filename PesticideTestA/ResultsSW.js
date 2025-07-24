@@ -19,7 +19,7 @@ if (rateRaw === null) {
     document.getElementById("statusText").textContent = "未接收到資料";
     document.getElementById("statusText").style.color = "#999";
 } 
-else if (enzymeError) {
+else if (enzymeError === "true") {
     document.getElementById("percentText").textContent = "酵素棒異常";
     document.getElementById("fgCircle").style.stroke = "#ccc";
     document.getElementById("statusText").textContent = "酵素活性不足";
