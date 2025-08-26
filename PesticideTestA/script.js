@@ -289,8 +289,6 @@ function calculatePercentageReduction(b1Stats, b2Stats) {
     const avg = (q1Raw != null && q2Raw != null) ? ((q1Raw + q2Raw) / 2).toFixed(2) + "%" : "N/A";
 
     return {
-        q1Raw,
-        q2Raw,
         q1Percent: q1Raw != null ? q1Raw.toFixed(2) + "%" : "N/A",
         q2Percent: q2Raw != null ? q2Raw.toFixed(2) + "%" : "N/A",
         average: avg
@@ -381,11 +379,8 @@ function showQuartiles() {
     const percentReduction = calculatePercentageReduction(b1Stats, b2Stats);
     const percentResult = percentReduction.q2Percent;
 
-    if (percentReduction.q2Raw < 0) {
-    localStorage.setItem("rate", "-1");  // 特別用 -1 當作不適用標記
-    } else {
-    localStorage.setItem("rate", percentReduction.q2Raw.toFixed(2));
-    }
+    // 儲存並跳轉
+    localStorage.setItem("rate", percentResult);
 
     // 匯出分析結果
     exportToExcel(logRGBValues);
