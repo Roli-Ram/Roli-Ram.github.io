@@ -427,42 +427,288 @@ function fallbackExportForIOS(csvData) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>分析結果</title>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
-        .instructions { background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-        .data { background: #f8f9fa; padding: 15px; border-radius: 8px; font-family: monospace; white-space: pre-wrap; }
-        .copy-btn { background: #007AFF; color: white; border: none; padding: 10px 20px; border-radius: 6px; margin: 10px 0; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif; 
+            padding: 20px; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            line-height: 1.6;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #007AFF, #5856D6);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+        }
+        .instructions { 
+            background: #fff3cd; 
+            padding: 20px; 
+            border-radius: 12px; 
+            margin-bottom: 25px;
+            border-left: 4px solid #ffc107;
+        }
+        .step {
+            margin: 15px 0;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 3px solid #007AFF;
+        }
+        .step-number {
+            display: inline-block;
+            background: #007AFF;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 14px;
+        }
+        .data { 
+            background: #f8f9fa; 
+            padding: 15px; 
+            border-radius: 8px; 
+            font-family: 'SF Mono', Monaco, monospace; 
+            white-space: pre-wrap;
+            font-size: 12px;
+            border: 1px solid #dee2e6;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .copy-btn { 
+            background: #28a745; 
+            color: white; 
+            border: none; 
+            padding: 15px 25px; 
+            border-radius: 10px; 
+            margin: 15px 5px; 
+            font-size: 16px;
+            font-weight: 600;
+            box-shadow: 0 2px 10px rgba(40, 167, 69, 0.3);
+            transition: all 0.3s ease;
+        }
+        .copy-btn:active {
+            transform: scale(0.95);
+            background: #218838;
+        }
+        .share-btn {
+            background: #007AFF; 
+            color: white; 
+            border: none; 
+            padding: 15px 25px; 
+            border-radius: 10px; 
+            margin: 15px 5px; 
+            font-size: 16px;
+            font-weight: 600;
+            box-shadow: 0 2px 10px rgba(0, 122, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        .share-btn:active {
+            transform: scale(0.95);
+            background: #0056b3;
+        }
+        .warning {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #dc3545;
+            margin: 15px 0;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+            margin: 15px 0;
+            display: none;
+        }
+        .app-icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
     </style>
 </head>
 <body>
-    <h1>📊 攝像頭分析結果</h1>
-    <div class="instructions">
-        <strong>📱 如何儲存此資料：</strong><br>
-        1. 點擊下方「複製資料」按鈕<br>
-        2. 開啟「備忘錄」或「檔案」app<br>
-        3. 建立新檔案並貼上資料<br>
-        4. 儲存為 .csv 檔案
+    <div class="header">
+        <h1>📊 攝像頭分析結果</h1>
+        <p>請按照以下步驟儲存資料到您的 iPhone</p>
     </div>
     
-    <button class="copy-btn" onclick="copyToClipboard()">📋 複製資料</button>
+    <div class="instructions">
+        <h2>🔥 推薦方法：使用「檔案」App</h2>
+        
+        <div class="step">
+            <span class="step-number">1</span>
+            <strong>複製資料：</strong>點擊下方「📋 複製資料」按鈕
+        </div>
+        
+        <div class="step">
+            <span class="step-number">2</span>
+            <strong>開啟檔案 App：</strong>在 iPhone 桌面找到 
+            <span style="background: #007AFF; color: white; padding: 2px 6px; border-radius: 4px;">📁 檔案</span> 
+            App 並點擊開啟
+        </div>
+        
+        <div class="step">
+            <span class="step-number">3</span>
+            <strong>建立新檔案：</strong><br>
+            • 點擊右上角的 <strong>「⋯」</strong> 按鈕<br>
+            • 選擇 <strong>「新增文件」</strong><br>
+            • 或長按空白處，選擇 <strong>「新增文件」</strong>
+        </div>
+        
+        <div class="step">
+            <span class="step-number">4</span>
+            <strong>貼上並命名：</strong><br>
+            • 在文字區域<strong>長按</strong>，選擇 <strong>「貼上」</strong><br>
+            • 將檔名改為：<code>analysis_${new Date().toISOString().slice(0,10)}.csv</code><br>
+            • <strong>重要：副檔名一定要是 .csv</strong>
+        </div>
+        
+        <div class="step">
+            <span class="step-number">5</span>
+            <strong>儲存完成：</strong>點擊 <strong>「儲存」</strong>，檔案會存在「我的 iPhone」→「檔案」資料夾
+        </div>
+    </div>
+
+    <div class="warning">
+        <strong>⚠️ 重要提醒：</strong><br>
+        • 檔名結尾一定要加 <strong>.csv</strong> 才能被 Excel 或試算表軟體正確開啟<br>
+        • 如果忘記加 .csv，之後可以重新命名檔案
+    </div>
     
-    <div class="data" id="csvData">${csvData}</div>
+    <div style="text-align: center; margin: 25px 0;">
+        <button class="copy-btn" onclick="copyToClipboard()">📋 複製資料</button>
+        <button class="share-btn" onclick="shareData()" id="shareBtn" style="display: none;">📤 分享檔案</button>
+    </div>
+    
+    <div class="success" id="successMessage">
+        <strong>✅ 複製成功！</strong><br>
+        現在請開啟「檔案」App 並按照上方步驟操作
+    </div>
+
+    <details style="margin-top: 30px;">
+        <summary style="font-size: 16px; font-weight: 600; cursor: pointer; padding: 10px;">
+            🔍 其他儲存方法（點擊展開）
+        </summary>
+        <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+            <h3>方法二：使用「備忘錄」App</h3>
+            <ol>
+                <li>複製資料後，開啟「備忘錄」App</li>
+                <li>建立新備忘錄並貼上資料</li>
+                <li>點擊分享按鈕，選擇「儲存到檔案」</li>
+                <li>將檔名改為 analysis.csv 並儲存</li>
+            </ol>
+            
+            <h3>方法三：使用 Email</h3>
+            <ol>
+                <li>複製資料後，開啟「郵件」App</li>
+                <li>寫一封 Email 給自己並貼上資料</li>
+                <li>傳送後在電腦上下載附件並另存為 .csv</li>
+            </ol>
+        </div>
+    </details>
+    
+    <div style="margin-top: 30px; padding: 15px; background: #e9ecef; border-radius: 8px; font-size: 12px;">
+        <h4>📄 資料預覽：</h4>
+        <div class="data" id="csvData">${csvData}</div>
+    </div>
     
     <script>
+        // 檢查是否支援 Web Share API
+        if (navigator.share && navigator.canShare) {
+            document.getElementById('shareBtn').style.display = 'inline-block';
+        }
+        
         function copyToClipboard() {
             const data = document.getElementById('csvData').textContent;
-            navigator.clipboard.writeText(data).then(() => {
-                alert('✅ 資料已複製到剪貼簿！');
-            }).catch(err => {
-                // 備用複製方法
-                const textArea = document.createElement('textarea');
-                textArea.value = data;
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textArea);
-                alert('✅ 資料已複製到剪貼簿！');
-            });
+            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(data).then(() => {
+                    showSuccess();
+                }).catch(err => {
+                    fallbackCopy(data);
+                });
+            } else {
+                fallbackCopy(data);
+            }
         }
+        
+        function fallbackCopy(data) {
+            // 備用複製方法
+            const textArea = document.createElement('textarea');
+            textArea.value = data;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-9999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                showSuccess();
+            } catch (err) {
+                alert('❌ 複製失敗，請手動選取並複製下方資料');
+            } finally {
+                document.body.removeChild(textArea);
+            }
+        }
+        
+        function showSuccess() {
+            const successMsg = document.getElementById('successMessage');
+            successMsg.style.display = 'block';
+            successMsg.scrollIntoView({ behavior: 'smooth' });
+            
+            // 3秒後自動隱藏
+            setTimeout(() => {
+                successMsg.style.display = 'none';
+            }, 5000);
+        }
+        
+        async function shareData() {
+            const data = document.getElementById('csvData').textContent;
+            const filename = 'analysis_${new Date().toISOString().slice(0,10)}.csv';
+            
+            try {
+                const file = new File([data], filename, { 
+                    type: 'text/csv',
+                    lastModified: Date.now() 
+                });
+                
+                if (navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        title: '攝像頭分析結果',
+                        text: '分析資料 CSV 檔案',
+                        files: [file]
+                    });
+                } else {
+                    alert('⚠️ 您的瀏覽器版本不支援檔案分享，請使用複製方式');
+                }
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    alert('❌ 分享失敗：' + error.message);
+                }
+            }
+        }
+        
+        // 防止頁面意外關閉
+        window.addEventListener('beforeunload', function(e) {
+            if (document.getElementById('successMessage').style.display === 'block') {
+                const confirmationMessage = '您確定要離開嗎？請確認已完成檔案儲存。';
+                e.returnValue = confirmationMessage;
+                return confirmationMessage;
+            }
+        });
     </script>
 </body>
 </html>`;
@@ -578,43 +824,282 @@ function showQuartiles() {
         stats: { b1Stats, b2Stats }
     };
 
-    // 匯出分析結果
-    exportAnalysisData(logRGBValues);
+    // 顯示分析完成對話框
+    showAnalysisCompleteDialog();
+}
+
+function showAnalysisCompleteDialog() {
+    const device = detectDevice();
+    const results = window.analysisResults;
     
-    // 如果有結果頁面，跳轉過去
-    if (document.querySelector('a[href="Results.html"]') || window.location.href.includes('Results.html')) {
-        location.href = "Results.html";
+    // 創建自訂對話框
+    const dialog = document.createElement('div');
+    dialog.id = 'analysisDialog';
+    dialog.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+    `;
+    
+    dialog.innerHTML = `
+        <div style="
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        ">
+            <div style="font-size: 48px; margin-bottom: 15px;">🎉</div>
+            <h2 style="color: #333; margin: 0 0 15px 0;">分析完成！</h2>
+            
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin: 20px 0; text-align: left;">
+                <div style="margin: 8px 0;"><strong>抑制率：</strong> ${results.rate}</div>
+                <div style="margin: 8px 0;"><strong>酵素狀態：</strong> 
+                    <span style="color: ${results.enzymeError ? '#dc3545' : '#28a745'};">
+                        ${results.enzymeError ? '異常' : '正常'}
+                    </span>
+                </div>
+                <div style="margin: 8px 0;"><strong>資料點數：</strong> ${results.rawData.length}</div>
+            </div>
+            
+            <p style="color: #666; margin: 20px 0; line-height: 1.5;">
+                ${device.isIOS ? 
+                    '是否要儲存分析結果？<br><small style="color: #999;">點擊「是」會開啟新視窗提供儲存指引</small>' :
+                    '是否要將分析結果下載到裝置？<br><small style="color: #999;">將自動下載 CSV 檔案</small>'
+                }
+            </p>
+            
+            <div style="display: flex; gap: 15px; justify-content: center; margin-top: 25px;">
+                <button id="saveYes" style="
+                    background: #28a745;
+                    color: white;
+                    border: none;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    font-size: 16px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    min-width: 80px;
+                ">是</button>
+                
+                <button id="saveNo" style="
+                    background: #6c757d;
+                    color: white;
+                    border: none;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    font-size: 16px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    min-width: 80px;
+                ">否</button>
+            </div>
+            
+            <div style="margin-top: 20px; font-size: 12px; color: #999;">
+                ${device.isIOS ? '🍎 iOS 裝置' : '🤖 Android 裝置'}
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(dialog);
+    
+    // 按鈕事件處理
+    document.getElementById('saveYes').addEventListener('click', () => {
+        document.body.removeChild(dialog);
+        // 自動儲存分析結果
+        exportAnalysisData(results.rawData);
+        
+        // 顯示儲存狀態
+        showSaveStatus(true, device.isIOS);
+        
+        // 跳轉到結果頁面（如果存在）
+        setTimeout(() => {
+            if (document.querySelector('a[href="Results.html"]') || window.location.href.includes('Results.html')) {
+                location.href = "Results.html";
+            } else {
+                displayResultsOnCurrentPage();
+            }
+        }, device.isIOS ? 2000 : 1000);
+    });
+    
+    document.getElementById('saveNo').addEventListener('click', () => {
+        document.body.removeChild(dialog);
+        showSaveStatus(false);
+        
+        // 直接跳轉到結果頁面
+        setTimeout(() => {
+            if (document.querySelector('a[href="Results.html"]') || window.location.href.includes('Results.html')) {
+                location.href = "Results.html";
+            } else {
+                displayResultsOnCurrentPage();
+            }
+        }, 500);
+    });
+    
+    // 點擊背景關閉（預設為「否」）
+    dialog.addEventListener('click', (e) => {
+        if (e.target === dialog) {
+            document.getElementById('saveNo').click();
+        }
+    });
+    
+    // 添加按鈕懸停效果
+    const buttons = dialog.querySelectorAll('button');
+    buttons.forEach(btn => {
+        btn.addEventListener('mouseenter', () => {
+            btn.style.transform = 'translateY(-2px)';
+            btn.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)';
+        });
+        
+        btn.addEventListener('mouseleave', () => {
+            btn.style.transform = 'translateY(0)';
+            btn.style.boxShadow = 'none';
+        });
+        
+        btn.addEventListener('touchstart', () => {
+            btn.style.transform = 'scale(0.95)';
+        });
+        
+        btn.addEventListener('touchend', () => {
+            btn.style.transform = 'scale(1)';
+        });
+    });
+}
+
+function showSaveStatus(saved, isIOS = false) {
+    const statusDiv = document.createElement('div');
+    statusDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10001;
+        padding: 15px 25px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        transition: all 0.3s ease;
+    `;
+    
+    if (saved) {
+        statusDiv.style.background = '#28a745';
+        statusDiv.style.color = 'white';
+        statusDiv.innerHTML = isIOS ? 
+            '✅ 已開啟儲存頁面，請按照指引操作' : 
+            '✅ 檔案已開始下載到您的裝置';
     } else {
-        // 沒有結果頁面時，顯示結果在當前頁面
-        displayResultsOnCurrentPage();
+        statusDiv.style.background = '#ffc107';
+        statusDiv.style.color = '#333';
+        statusDiv.innerHTML = '⏭️ 已跳過儲存，直接查看結果';
     }
+    
+    document.body.appendChild(statusDiv);
+    
+    // 自動消失
+    setTimeout(() => {
+        statusDiv.style.opacity = '0';
+        statusDiv.style.transform = 'translateX(-50%) translateY(-20px)';
+        setTimeout(() => {
+            if (statusDiv.parentNode) {
+                document.body.removeChild(statusDiv);
+            }
+        }, 300);
+    }, isIOS ? 4000 : 3000);
 }
 
 function displayResultsOnCurrentPage() {
     const results = window.analysisResults;
     if (!results) return;
     
+    const device = detectDevice();
     const resultDiv = document.getElementById('result') || document.createElement('div');
     resultDiv.innerHTML = `
-        <h2>📊 分析完成</h2>
-        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3>結果摘要：</h3>
-            <p><strong>抑制率：</strong>${results.rate}</p>
-            <p><strong>酵素狀態：</strong>${results.enzymeError ? '異常' : '正常'}</p>
-            <p><strong>資料點數：</strong>${results.rawData.length}</p>
+        <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); margin: 20px 0;">
+            <h2 style="text-align: center; color: #333; margin-bottom: 25px;">📊 分析結果</h2>
+            
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h3 style="margin-top: 0; color: #495057;">結果摘要：</h3>
+                <div style="display: grid; gap: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #dee2e6;">
+                        <strong>抑制率：</strong>
+                        <span style="font-size: 18px; font-weight: bold; color: #007bff;">${results.rate}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #dee2e6;">
+                        <strong>酵素狀態：</strong>
+                        <span style="padding: 4px 12px; border-radius: 20px; font-weight: bold; color: white; background: ${results.enzymeError ? '#dc3545' : '#28a745'};">
+                            ${results.enzymeError ? '異常' : '正常'}
+                        </span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0;">
+                        <strong>資料點數：</strong>
+                        <span>${results.rawData.length}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 25px;">
+                <button onclick="exportAnalysisData(window.analysisResults.rawData)" 
+                        style="
+                            background: linear-gradient(135deg, #28a745, #20c997);
+                            color: white; 
+                            border: none; 
+                            padding: 15px 30px; 
+                            border-radius: 10px; 
+                            font-size: 16px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+                            transition: all 0.3s ease;
+                        "
+                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(40, 167, 69, 0.4)'"
+                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(40, 167, 69, 0.3)'"
+                        ontouchstart="this.style.transform='scale(0.95)'"
+                        ontouchend="this.style.transform='scale(1)'">
+                    📥 ${device.isIOS ? '儲存分析資料' : '下載分析資料'}
+                </button>
+                
+                <div style="margin-top: 15px; font-size: 14px; color: #6c757d;">
+                    ${device.isIOS ? 
+                        '點擊後會開啟新頁面並提供儲存指引' : 
+                        '點擊後會自動下載 CSV 檔案到您的裝置'
+                    }
+                </div>
+            </div>
+            
+            ${results.enzymeError ? `
+                <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 8px; margin-top: 20px;">
+                    <h4 style="color: #856404; margin-top: 0;">⚠️ 注意事項</h4>
+                    <p style="color: #856404; margin: 0; line-height: 1.5;">
+                        檢測到酵素狀態異常，建議重新檢測或諮詢專業人員。
+                    </p>
+                </div>
+            ` : ''}
         </div>
-        <button onclick="exportAnalysisData(window.analysisResults.rawData)" 
-                style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 6px;">
-            📥 重新匯出資料
-        </button>
     `;
     
     if (!document.getElementById('result')) {
         document.body.appendChild(resultDiv);
     }
+    
+    // 滾動到結果區域
+    resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // 初始化
 startCamera().catch(console.error);
 makeDraggable(redBox1);
 makeDraggable(redBox2);
+ 
