@@ -15,29 +15,50 @@ let redBoxPositions = {
     redBox2: { left: 0, top: 0 },
 };
 
+// 檢測裝置類型
+function detectDevice() {
+    const userAgent = navigator.userAgent;
+    const isIOS = /iPad|iPhone|iPod/.test(userAgent);
+    const isAndroid = /Android/.test(userAgent);
+    return { isIOS, isAndroid };
+}
+
 async function startCamera() {
     video.setAttribute('playsinline', true);
     video.setAttribute('webkit-playsinline', true);
 
     try {
         const constraints = {
-            video: { facingMode: 'environment' }
+            video: { 
+                facingMode: 'environment',
+                // 為 iOS 優化的設定
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            }
         };
         
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
             throw new Error("瀏覽器不支持 getUserMedia");
         }
+        
         stream = await navigator.mediaDevices.getUserMedia(constraints);
         video.srcObject = stream;
-        video.onloadedmetadata = () => {
-            video.play();
-        };
-        analyzeBtn.disabled = false;
-        stopBtn.disabled = true;
+        
+        return new Promise((resolve, reject) => {
+            video.onloadedmetadata = () => {
+                video.play().then(() => {
+                    analyzeBtn.disabled = false;
+                    stopBtn.disabled = true;
+                    resolve();
+                }).catch(reject);
+            };
+        });
+        
     } catch (err) {
         console.error("無法啟動攝像頭: ", err);
         result.innerHTML = `錯誤：無法啟動攝像頭。請檢查瀏覽器權限設置或設備支持性。${err.message}`;
         analyzeBtn.disabled = true;
+        throw err;
     }
 }
 
@@ -181,10 +202,12 @@ analyzeBtn.addEventListener('click', async function () {
     stopBtn.disabled = false;
     analyzeBtn.disabled = true;
 
-    analyzingOverlay.style.display = 'flex'; //  顯示提示條
-    //await toggleTorch(true);
+    analyzingOverlay.style.display = 'flex';
+    
+    // 嘗試開啟手電筒（如果支援）
+    toggleTorch(true);
 
-    // 立刻顯示
+    // 立即顯示
     const color1 = getAverageColor(redBox1);
     const color2 = getAverageColor(redBox2);
 
@@ -233,49 +256,67 @@ analyzeBtn.addEventListener('click', async function () {
             analyzeBtn.disabled = false;
             stopBtn.disabled = true;
             toggleTorch(false);
-            analyzingOverlay.style.display = 'none'; // 分析結束隱藏
+            analyzingOverlay.style.display = 'none';
             showQuartiles();
         }
     }, 2000);
 });
 
+// 停止按鈕功能
+stopBtn.addEventListener('click', function() {
+    if (interval) {
+        clearInterval(interval);
+        interval = null;
+    }
+    analyzeBtn.disabled = false;
+    stopBtn.disabled = true;
+    toggleTorch(false);
+    analyzingOverlay.style.display = 'none';
+    
+    if (logRGBValues.length > 1) {
+        showQuartiles();
+    }
+});
+
 function toggleTorch(on) {
     try {
-        const track = stream.getVideoTracks()[0];
-        const capabilities = track.getCapabilities();
-        if (capabilities.torch) {
-            track.applyConstraints({
-                advanced: [{ torch: on }]
-            });
+        if (stream && stream.getVideoTracks().length > 0) {
+            const track = stream.getVideoTracks()[0];
+            const capabilities = track.getCapabilities();
+            if (capabilities.torch) {
+                track.applyConstraints({
+                    advanced: [{ torch: on }]
+                });
+            }
         }
     } catch (err) {
         console.error("無法控制手電筒: ", err);
     }
 }
 
-startCamera();
-makeDraggable(redBox1);
-makeDraggable(redBox2);
-//20250514
+// 啟動相機按鈕
 document.getElementById('startBtn').addEventListener('click', async () => {
-    await startCamera();
-     // 更新紅框位置
-    video.onloadeddata = () => {
-        updateRedBoxPositions();
+    try {
+        await startCamera();
+        // 更新紅框位置
+        video.onloadeddata = () => {
+            updateRedBoxPositions();
 
-        // 抓取紅框 RGB 值
-        const color1 = getAverageColor(redBox1);
-        const color2 = getAverageColor(redBox2);
+            // 抓取紅框 RGB 值
+            const color1 = getAverageColor(redBox1);
+            const color2 = getAverageColor(redBox2);
 
-        // 顯示在 result 區塊
-        result.innerHTML = `
-            空白組 RGB: (${color1.r.toFixed(3)}, ${color1.g.toFixed(3)}, ${color1.b.toFixed(3)})<br>
-            樣品組 RGB: (${color2.r.toFixed(3)}, ${color2.g.toFixed(3)}, ${color2.b.toFixed(3)})<br>
-        `;
-    };
-    });    
-//20250514
-   
+            // 顯示在 result 區塊
+            result.innerHTML = `
+                空白組 RGB: (${color1.r.toFixed(3)}, ${color1.g.toFixed(3)}, ${color1.b.toFixed(3)})<br>
+                樣品組 RGB: (${color2.r.toFixed(3)}, ${color2.g.toFixed(3)}, ${color2.b.toFixed(3)})<br>
+            `;
+        };
+    } catch (error) {
+        console.error('啟動相機失敗:', error);
+    }
+});
+
 function calculatePercentageReduction(b1Stats, b2Stats) {
     function safePercent(qB1, qB2) {
         const n1 = parseFloat(qB1);
@@ -309,32 +350,191 @@ function updateRedBoxPositions() {
     });
 }
 
-// 匯出 Excel 檔案
-function exportToExcel(data) {
-    const wb = XLSX.utils.book_new();
+// 改進的檔案匯出函數 - 支援跨平台
+function exportAnalysisData(data) {
+    const device = detectDevice();
+    
+    // 準備 CSV 資料
+    const csvData = convertToCSV(data);
+    const filename = generateFilename();
+    
+    if (device.isIOS) {
+        // iOS: 在新視窗開啟資料
+        exportForIOS(csvData, filename);
+    } else {
+        // Android/其他: 直接下載
+        exportWithDownload(csvData, filename);
+    }
+}
 
-    const worksheetData = [
-        ["時間", "空白組 R", "空白組 G", "空白組 B", "樣品組 R", "樣品組 G", "樣品組 B", "B通道變化量1", "B通道變化量2"]
+function convertToCSV(data) {
+    const headers = [
+        "時間", "空白組 R", "空白組 G", "空白組 B", 
+        "樣品組 R", "樣品組 G", "樣品組 B", 
+        "B通道變化量1", "B通道變化量2"
     ];
+    
+    const rows = data.map(entry => [
+        entry.time,
+        entry.color1.r, entry.color1.g, entry.color1.b,
+        entry.color2.r, entry.color2.g, entry.color2.b,
+        entry.slope ? entry.slope.b1 : "", 
+        entry.slope ? entry.slope.b2 : ""
+    ]);
+    
+    const csvContent = [headers, ...rows]
+        .map(row => row.map(field => `"${field}"`).join(','))
+        .join('\n');
+    
+    // 加入 BOM 以支援中文
+    return '\ufeff' + csvContent;
+}
 
-    data.forEach(entry => {
-        worksheetData.push([
-            entry.time,
-            entry.color1.r, entry.color1.g, entry.color1.b,
-            entry.color2.r, entry.color2.g, entry.color2.b,
-            entry.slope ? entry.slope.b1 : "", 
-            entry.slope ? entry.slope.b2 : ""
-        ]);
-    });
-
-    const ws = XLSX.utils.aoa_to_sheet(worksheetData);
-    XLSX.utils.book_append_sheet(wb, ws, "分析記錄");
-
+function generateFilename() {
     const now = new Date();
     const pad = n => n.toString().padStart(2, '0');
-    const filename = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}.xlsx`;
+    return `analysis_${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}.csv`;
+}
 
-    XLSX.writeFile(wb, filename);
+function exportForIOS(csvData, filename) {
+    // 方法1: 嘗試 Web Share API (iOS 12+)
+    if (navigator.share) {
+        try {
+            const file = new File([csvData], filename, { type: 'text/csv' });
+            navigator.share({
+                title: '分析結果',
+                files: [file]
+            }).catch(err => {
+                console.log('分享失敗，使用備用方法');
+                fallbackExportForIOS(csvData);
+            });
+            return;
+        } catch (error) {
+            console.log('Web Share API 不支援，使用備用方法');
+        }
+    }
+    
+    // 備用方法: 新視窗開啟
+    fallbackExportForIOS(csvData);
+}
+
+function fallbackExportForIOS(csvData) {
+    const htmlContent = `
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分析結果</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+        .instructions { background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .data { background: #f8f9fa; padding: 15px; border-radius: 8px; font-family: monospace; white-space: pre-wrap; }
+        .copy-btn { background: #007AFF; color: white; border: none; padding: 10px 20px; border-radius: 6px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>📊 攝像頭分析結果</h1>
+    <div class="instructions">
+        <strong>📱 如何儲存此資料：</strong><br>
+        1. 點擊下方「複製資料」按鈕<br>
+        2. 開啟「備忘錄」或「檔案」app<br>
+        3. 建立新檔案並貼上資料<br>
+        4. 儲存為 .csv 檔案
+    </div>
+    
+    <button class="copy-btn" onclick="copyToClipboard()">📋 複製資料</button>
+    
+    <div class="data" id="csvData">${csvData}</div>
+    
+    <script>
+        function copyToClipboard() {
+            const data = document.getElementById('csvData').textContent;
+            navigator.clipboard.writeText(data).then(() => {
+                alert('✅ 資料已複製到剪貼簿！');
+            }).catch(err => {
+                // 備用複製方法
+                const textArea = document.createElement('textarea');
+                textArea.value = data;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('✅ 資料已複製到剪貼簿！');
+            });
+        }
+    </script>
+</body>
+</html>`;
+    
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const newWindow = window.open(url, '_blank');
+    
+    if (!newWindow) {
+        alert('⚠️ 無法開啟新視窗，請檢查彈窗設定');
+    }
+    
+    // 延遲釋放 URL
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
+}
+
+function exportWithDownload(csvData, filename) {
+    try {
+        const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+        
+        console.log('✅ 檔案下載成功');
+    } catch (error) {
+        console.error('下載失敗:', error);
+        // 備用：使用 data URL
+        const dataURL = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvData);
+        const link = document.createElement('a');
+        link.href = dataURL;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+}
+
+// 舊的 Excel 導出函數保持向後兼容（如果需要）
+function exportToExcel(data) {
+    if (typeof XLSX !== 'undefined') {
+        // 如果有 XLSX 庫，使用原本的 Excel 導出
+        const wb = XLSX.utils.book_new();
+        const worksheetData = [
+            ["時間", "空白組 R", "空白組 G", "空白組 B", "樣品組 R", "樣品組 G", "樣品組 B", "B通道變化量1", "B通道變化量2"]
+        ];
+
+        data.forEach(entry => {
+            worksheetData.push([
+                entry.time,
+                entry.color1.r, entry.color1.g, entry.color1.b,
+                entry.color2.r, entry.color2.g, entry.color2.b,
+                entry.slope ? entry.slope.b1 : "", 
+                entry.slope ? entry.slope.b2 : ""
+            ]);
+        });
+
+        const ws = XLSX.utils.aoa_to_sheet(worksheetData);
+        XLSX.utils.book_append_sheet(wb, ws, "分析記錄");
+
+        const now = new Date();
+        const pad = n => n.toString().padStart(2, '0');
+        const filename = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}.xlsx`;
+
+        XLSX.writeFile(wb, filename);
+    } else {
+        // 沒有 XLSX 庫，使用 CSV 導出
+        exportAnalysisData(data);
+    }
 }
 
 function movingAverage(values, windowSize = 5) {
@@ -355,7 +555,7 @@ function showQuartiles() {
         !isNaN(parseFloat(entry.slope.b2))
     );
 
-    // 不取變化幅度（無論上升或下降）
+    // 取變化幅度（無論上升或下降）
     const rawB1 = validData.map(entry => (parseFloat(entry.slope.b1)));
     const rawB2 = validData.map(entry => (parseFloat(entry.slope.b2)));
 
@@ -368,22 +568,53 @@ function showQuartiles() {
     const b2Stats = calculateQuartiles(b2Smoothed);
 
     // 異常確認
-    if (!isNaN(parseFloat(b1Stats.q2)) && parseFloat(b1Stats.q2) < 0.4) {
-    localStorage.setItem("enzymeError", "true");
-    }
-    else {
-    localStorage.setItem("enzymeError", "false");
-    }
-
-    // 計算抑制率
-    const percentReduction = calculatePercentageReduction(b1Stats, b2Stats);
-    const percentResult = percentReduction.q2Percent;
-
-    // 儲存並跳轉
-    localStorage.setItem("rate", percentResult);
+    const isEnzymeError = !isNaN(parseFloat(b1Stats.q2)) && parseFloat(b1Stats.q2) < 0.4;
+    
+    // 儲存到記憶體（不使用 localStorage，因為在某些環境可能不可用）
+    window.analysisResults = {
+        enzymeError: isEnzymeError,
+        rate: calculatePercentageReduction(b1Stats, b2Stats).q2Percent,
+        rawData: logRGBValues,
+        stats: { b1Stats, b2Stats }
+    };
 
     // 匯出分析結果
-    exportToExcel(logRGBValues);
+    exportAnalysisData(logRGBValues);
     
-    location.href = "Results.html";
+    // 如果有結果頁面，跳轉過去
+    if (document.querySelector('a[href="Results.html"]') || window.location.href.includes('Results.html')) {
+        location.href = "Results.html";
+    } else {
+        // 沒有結果頁面時，顯示結果在當前頁面
+        displayResultsOnCurrentPage();
+    }
 }
+
+function displayResultsOnCurrentPage() {
+    const results = window.analysisResults;
+    if (!results) return;
+    
+    const resultDiv = document.getElementById('result') || document.createElement('div');
+    resultDiv.innerHTML = `
+        <h2>📊 分析完成</h2>
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3>結果摘要：</h3>
+            <p><strong>抑制率：</strong>${results.rate}</p>
+            <p><strong>酵素狀態：</strong>${results.enzymeError ? '異常' : '正常'}</p>
+            <p><strong>資料點數：</strong>${results.rawData.length}</p>
+        </div>
+        <button onclick="exportAnalysisData(window.analysisResults.rawData)" 
+                style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 6px;">
+            📥 重新匯出資料
+        </button>
+    `;
+    
+    if (!document.getElementById('result')) {
+        document.body.appendChild(resultDiv);
+    }
+}
+
+// 初始化
+startCamera().catch(console.error);
+makeDraggable(redBox1);
+makeDraggable(redBox2);
